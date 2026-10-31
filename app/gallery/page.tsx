@@ -1,0 +1,3 @@
+import { PageShell } from '@/components/page-shell'
+
+export default function GalleryPage() { return <PageShell eyebrow="03 — Gallery / portfolio" title="The space for the work." copy="A focused training floor, serious equipment, and a community that keeps the energy high."><section className="container gallery-page-grid"><div className="gallery-tile tile-one"><span>TRAIN</span></div><div className="gallery-tile tile-two"><span>RECOVER</span></div><div className="gallery-tile tile-three"><span>REPEAT</span></div><div className="gallery-tile tile-four"><span>PRESS ON</span></div></section></PageShell> }
