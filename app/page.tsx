@@ -486,6 +486,8 @@ export default function Page() {
 
           <p className="form-disclaimer">
             All details sent directly to <strong>carlvine0926@gmail.com</strong>. We confirm via SMS or Phone Call within 2 business hours.
+            <br />
+            <strong>Payments Accepted:</strong> Cash &amp; Online (GCash, Maya, Bank Transfer) &middot; <em>No cards accepted</em>
           </p>
         </form>
       </section>
@@ -715,14 +717,14 @@ export default function Page() {
             <details className="faq-item">
               <summary>Is there parking available on-site?</summary>
               <div className="faq-answer">
-                <p>Yes, we offer free parking for cars and motorcycles directly in front of the gym along Fitness Avenue.</p>
+                <p>Yes! The gym is located right beside the sports court / parking area, which is where we recommend all members and visitors park. There is convenient space for both motorcycles and cars while you train.</p>
               </div>
             </details>
 
             <details className="faq-item">
               <summary>What payment methods do you accept?</summary>
               <div className="faq-answer">
-                <p>We accept Cash, GCash, Maya, Bank Transfer (BDO, BPI), and major Credit/Debit cards at our front desk.</p>
+                <p>We accept <strong>Cash</strong> and <strong>Online Payments</strong> (GCash, Maya, and Bank Transfer / QR Ph) at the front desk. Please note that we <strong>do not accept credit or debit cards</strong> at this time.</p>
               </div>
             </details>
           </div>
@@ -744,7 +746,15 @@ export default function Page() {
                 <div>
                   <strong>Location & Address</strong>
                   <p>123 Fitness Avenue, Quezon City, Philippines</p>
-                  <small className="info-hint">(Near City Center &middot; Free Parking on Premises)</small>
+                  <small className="info-hint">(Right beside the Sports Court &middot; Court Parking for Cars &amp; Motorcycles)</small>
+                </div>
+              </div>
+              <div className="info-item">
+                <span className="info-icon">💵</span>
+                <div>
+                  <strong>Accepted Payment Methods</strong>
+                  <p>Cash &middot; GCash &middot; Maya &middot; Bank Transfer</p>
+                  <small className="info-hint">(Card payments not accepted)</small>
                 </div>
               </div>
               <div className="info-item">
