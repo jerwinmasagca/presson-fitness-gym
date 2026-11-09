@@ -80,6 +80,11 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
           membershipSelect.style.boxShadow = '';
         }, 1500);
+
+        const joinSection = document.getElementById('join');
+        if (joinSection) {
+          joinSection.scrollIntoView({ behavior: 'smooth' });
+        }
       }
     });
   });
@@ -105,7 +110,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
       try {
         const formData = new FormData(form);
-        const response = await fetch(form.action, {
+        // FormSubmit requires /ajax/ endpoint for XMLHttpRequest / Fetch requests
+        const ajaxUrl = form.action.includes('/ajax/')
+          ? form.action
+          : form.action.replace('formsubmit.co/', 'formsubmit.co/ajax/');
+
+        const response = await fetch(ajaxUrl, {
           method: 'POST',
           body: formData,
           headers: {
@@ -113,13 +123,21 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         });
 
-        if (response.ok) {
+        const data = await response.json().catch(() => null);
+
+        if (response.ok && data && (data.success === 'true' || data.success === true)) {
           if (feedbackDiv) {
             feedbackDiv.style.display = 'flex';
             feedbackDiv.className = 'form-feedback success';
             feedbackDiv.innerHTML = '<strong>✓ Form sent successfully!</strong> Your submission has been delivered directly to <strong>carlvine0926@gmail.com</strong>. Coach will reach out via SMS or Phone Call shortly.';
           }
           form.reset();
+        } else if (data && data.message) {
+          if (feedbackDiv) {
+            feedbackDiv.style.display = 'flex';
+            feedbackDiv.className = 'form-feedback error';
+            feedbackDiv.innerHTML = `<strong>Notice:</strong> ${data.message}`;
+          }
         } else {
           // Fallback if service returns status error
           form.submit();
@@ -135,6 +153,93 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     });
+  });
+
+  // 6. Interactive Gallery Lightbox Modal
+  const galleryTiles = Array.from(document.querySelectorAll('.gallery-tile[data-img]'));
+  const lightbox = document.getElementById('galleryLightbox');
+  const lightboxImg = document.getElementById('lightboxImg');
+  const lightboxTitle = document.getElementById('lightboxTitle');
+  const lightboxDesc = document.getElementById('lightboxDesc');
+  const lightboxCounter = document.getElementById('lightboxCounter');
+  const lightboxClose = document.getElementById('lightboxClose');
+  const lightboxPrev = document.getElementById('lightboxPrev');
+  const lightboxNext = document.getElementById('lightboxNext');
+
+  let currentGalleryIndex = 0;
+
+  function updateLightbox(index) {
+    if (index < 0) index = galleryTiles.length - 1;
+    if (index >= galleryTiles.length) index = 0;
+    currentGalleryIndex = index;
+
+    const tile = galleryTiles[currentGalleryIndex];
+    const imgSrc = tile.getAttribute('data-img');
+    const title = tile.getAttribute('data-title') || '';
+    const desc = tile.getAttribute('data-desc') || '';
+
+    if (lightboxImg) lightboxImg.src = imgSrc;
+    if (lightboxTitle) lightboxTitle.textContent = title;
+    if (lightboxDesc) lightboxDesc.textContent = desc;
+    if (lightboxCounter) lightboxCounter.textContent = `${currentGalleryIndex + 1} / ${galleryTiles.length}`;
+  }
+
+  function openLightbox(index) {
+    if (!lightbox) return;
+    updateLightbox(index);
+    lightbox.classList.add('active');
+    lightbox.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    if (!lightbox) return;
+    lightbox.classList.remove('active');
+    lightbox.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  galleryTiles.forEach((tile, idx) => {
+    tile.addEventListener('click', () => openLightbox(idx));
+    tile.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openLightbox(idx);
+      }
+    });
+  });
+
+  if (lightboxClose) {
+    lightboxClose.addEventListener('click', closeLightbox);
+  }
+
+  if (lightboxPrev) {
+    lightboxPrev.addEventListener('click', (e) => {
+      e.stopPropagation();
+      updateLightbox(currentGalleryIndex - 1);
+    });
+  }
+
+  if (lightboxNext) {
+    lightboxNext.addEventListener('click', (e) => {
+      e.stopPropagation();
+      updateLightbox(currentGalleryIndex + 1);
+    });
+  }
+
+  if (lightbox) {
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) {
+        closeLightbox();
+      }
+    });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (!lightbox || !lightbox.classList.contains('active')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') updateLightbox(currentGalleryIndex - 1);
+    if (e.key === 'ArrowRight') updateLightbox(currentGalleryIndex + 1);
   });
 });
 

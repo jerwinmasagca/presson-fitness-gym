@@ -1,8 +1,60 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 const formAction = 'https://formsubmit.co/carlvine0926@gmail.com'
+const formAjaxAction = 'https://formsubmit.co/ajax/carlvine0926@gmail.com'
+
+const galleryItems = [
+  {
+    className: 'tile-one',
+    tag: '01 • Facility',
+    label: 'TRAIN',
+    img: '/gallery/828554454_1096056716270076_7678644003964894617_n.png',
+    title: 'Facility & Training Floor',
+    desc: 'Heavy-duty dumbbell racks, multiple workout benches, dual cable pulley station, and signature hexagonal LED ceiling lights.',
+  },
+  {
+    className: 'tile-two',
+    tag: '02 • Coaching',
+    label: 'STRENGTH',
+    img: '/gallery/839167560_1104821698726911_999525515312939096_n.png',
+    title: 'Strength & Form Coaching',
+    desc: 'Hands-on spotting, form adjustments, and progressive dumbbell bench training with experienced coaches.',
+  },
+  {
+    className: 'tile-three',
+    tag: '03 • Community',
+    label: 'COMMUNITY',
+    img: '/gallery/839766751_1104821828726898_7443232933410309067_n.png',
+    title: 'Gym Community & Equipment',
+    desc: 'Leg curl and extension stations, pull-up/dip towers, cardio bikes, and the iconic Presson wall mural.',
+  },
+  {
+    className: 'tile-four',
+    tag: '04 • Equipment',
+    label: 'EQUIPMENT',
+    img: '/gallery/828554454_1096056716270076_7678644003964894617_n.png',
+    title: 'Heavy Free Weights & Benches',
+    desc: 'Full tiered dumbbell racks and incline/decline benches positioned for optimal training ergonomics.',
+  },
+  {
+    className: 'tile-five',
+    tag: '05 • Guidance',
+    label: 'COACHING',
+    img: '/gallery/839167560_1104821698726911_999525515312939096_n.png',
+    title: 'Personal Training Sessions',
+    desc: 'Every session is supervised to ensure safe execution, proper muscle recruitment, and progressive overload.',
+  },
+  {
+    className: 'tile-six',
+    tag: '06 • Culture',
+    label: 'PRESS ON',
+    img: '/gallery/839766751_1104821828726898_7443232933410309067_n.png',
+    title: 'Presson Signature Space',
+    desc: 'Designed for serious lifters and beginners alike — clean air, rubberized flooring, and positive training culture.',
+  },
+]
 
 function Field({
   label,
@@ -43,21 +95,49 @@ export default function Page() {
     booking: 'idle',
     contact: 'idle',
   })
+  const [formMessages, setFormMessages] = useState<{ [key: string]: string }>({
+    membership: '',
+    booking: '',
+    contact: '',
+  })
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (lightboxIndex === null) return
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightboxIndex(null)
+      if (e.key === 'ArrowLeft') {
+        setLightboxIndex(prev => (prev === null ? null : (prev - 1 + galleryItems.length) % galleryItems.length))
+      }
+      if (e.key === 'ArrowRight') {
+        setLightboxIndex(prev => (prev === null ? null : (prev + 1) % galleryItems.length))
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [lightboxIndex])
 
   const closeMenu = () => setMobileMenuOpen(false)
 
   const handleSelectPlan = (plan: string) => {
     setSelectedPlan(plan)
+    if (typeof document !== 'undefined') {
+      const joinEl = document.getElementById('join')
+      if (joinEl) {
+        joinEl.scrollIntoView({ behavior: 'smooth' })
+      }
+    }
   }
 
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>, formKey: string) => {
     e.preventDefault()
     setFormStatuses(prev => ({ ...prev, [formKey]: 'submitting' }))
+    setFormMessages(prev => ({ ...prev, [formKey]: '' }))
     const form = e.currentTarget
     const formData = new FormData(form)
 
     try {
-      const res = await fetch(formAction, {
+      const res = await fetch(formAjaxAction, {
         method: 'POST',
         body: formData,
         headers: {
@@ -65,9 +145,15 @@ export default function Page() {
         },
       })
 
-      if (res.ok) {
+      const data = await res.json().catch(() => null)
+
+      if (res.ok && data && (data.success === 'true' || data.success === true)) {
         setFormStatuses(prev => ({ ...prev, [formKey]: 'success' }))
+        setFormMessages(prev => ({ ...prev, [formKey]: '' }))
         form.reset()
+      } else if (data && data.message) {
+        setFormStatuses(prev => ({ ...prev, [formKey]: 'error' }))
+        setFormMessages(prev => ({ ...prev, [formKey]: data.message }))
       } else {
         form.submit()
       }
@@ -82,7 +168,7 @@ export default function Page() {
       {/* Sticky Header Navigation */}
       <header className="site-header">
         <a className="brand" href="#home" aria-label="Presson Fitness Gym home">
-          <img className="logo-image" src="/images/presson-logo.png" alt="Presson Fitness Gym logo" />
+          <img className="logo-image" src="/images/logo.png" alt="Presson Fitness Gym logo" />
           <span>PRESSON<span>FITNESS GYM</span></span>
         </a>
 
@@ -99,8 +185,10 @@ export default function Page() {
         <nav aria-label="Primary navigation" className={mobileMenuOpen ? 'nav-active' : ''}>
           <a href="#home" onClick={closeMenu}>Home</a>
           <a href="#about" onClick={closeMenu}>About Us</a>
+          <a href="#rates" onClick={closeMenu}>Rates</a>
           <a href="#facility" onClick={closeMenu}>Facility</a>
           <a href="#services" onClick={closeMenu}>Services</a>
+          <a href="#gallery" onClick={closeMenu}>Gallery</a>
           <a href="#faq" onClick={closeMenu}>FAQs</a>
           <a href="#contact" onClick={closeMenu}>Contact</a>
           <a className="nav-cta" href="#join" onClick={closeMenu}>Join / Inquire</a>
@@ -207,11 +295,128 @@ export default function Page() {
         </div>
       </section>
 
-      {/* 03 — Start Your Membership / Inquiries (Form A + Direct Coach CTA) */}
+      {/* 03 — Rates & Membership Pricing Section */}
+      <section className="rates-section container" id="rates">
+        <SectionHeading
+          eyebrow="03 — Rates & Memberships"
+          title="Simple, Transparent Pricing."
+          copy="No hidden maintenance fees. No locked contracts. Pick the plan that fits your training schedule and goals."
+        />
+        <div className="pricing-grid">
+          {/* Card 1: Daily Session */}
+          <div className="pricing-card">
+            <span className="tier-badge">Day Pass / Walk-In</span>
+            <h3>Daily Session</h3>
+            <div className="price-tag">
+              <span className="currency">₱</span>
+              <span className="amount">65</span>
+              <span className="period">/ session</span>
+            </div>
+            <span className="student-price">Student / Senior: ₱60</span>
+            <p className="tier-desc">Flexible walk-in session for athletes, travelers, or testing the floor.</p>
+            <ul className="tier-features">
+              <li>Unlimited session from 8:00 AM – 10:00 PM</li>
+              <li>Free filtered cold / hot water</li>
+              <li>Full floor access to all free weights & machines</li>
+            </ul>
+            <button
+              type="button"
+              className="button button-outline tier-select-btn"
+              onClick={() => handleSelectPlan('Daily Session (Regular: ₱65 / Student & Senior: ₱60)')}
+            >
+              Select Day Pass ↗
+            </button>
+          </div>
+
+          {/* Card 2: Monthly Session (Featured) */}
+          <div className="pricing-card featured-pricing">
+            <span className="tier-badge highlight-badge">★ Most Popular / Best Value</span>
+            <h3>Monthly Session</h3>
+            <div className="price-tag">
+              <span className="currency">₱</span>
+              <span className="amount">750</span>
+              <span className="period">/ month</span>
+            </div>
+            <span className="student-price">Student / Senior: ₱700</span>
+            <p className="tier-desc">Our signature unlimited training membership for consistent lifters.</p>
+            <ul className="tier-features">
+              <li>Unlimited session from 8:00 AM – 10:00 PM</li>
+              <li>Free filtered cold / hot water</li>
+              <li>Unlimited Wi-Fi access</li>
+              <li>Unlimited treadmill & cardio access</li>
+              <li>Coaches on duty for spotting & form safety</li>
+            </ul>
+            <button
+              type="button"
+              className="button button-gold tier-select-btn"
+              onClick={() => handleSelectPlan('Monthly Session (Regular: ₱750 / Student & Senior: ₱700)')}
+            >
+              Select Monthly ↗
+            </button>
+          </div>
+
+          {/* Card 3: Quarterly (3 Months) */}
+          <div className="pricing-card">
+            <span className="tier-badge">3-Month Commitment</span>
+            <h3>Quarterly</h3>
+            <div className="price-tag">
+              <span className="currency">₱</span>
+              <span className="amount">2,100</span>
+              <span className="period">/ 3 months</span>
+            </div>
+            <span className="student-price">Student / Senior: ₱1,900</span>
+            <p className="tier-desc">90 days of locked-in progress plus official Press On workout gear.</p>
+            <ul className="tier-features">
+              <li>Unlimited session from 8:00 AM – 10:00 PM</li>
+              <li>Free filtered cold / hot water</li>
+              <li>Unlimited Wi-Fi access</li>
+              <li>Unlimited treadmill & cardio access</li>
+              <li>Official Press On workout tee included</li>
+            </ul>
+            <button
+              type="button"
+              className="button button-outline tier-select-btn"
+              onClick={() => handleSelectPlan('Quarterly 3-Months (Regular: ₱2,100 / Student: ₱1,900)')}
+            >
+              Select Quarterly ↗
+            </button>
+          </div>
+
+          {/* Card 4: Annually (12 Months) */}
+          <div className="pricing-card">
+            <span className="tier-badge">VIP Dedication</span>
+            <h3>Annually</h3>
+            <div className="price-tag">
+              <span className="currency">₱</span>
+              <span className="amount">7,950</span>
+              <span className="period">/ year</span>
+            </div>
+            <span className="student-price">Student / Senior: ₱7,100</span>
+            <p className="tier-desc">Full 365 days of dedication with maximum savings and exclusive athlete perks.</p>
+            <ul className="tier-features">
+              <li>Unlimited session from 8:00 AM – 10:00 PM</li>
+              <li>Free filtered cold / hot water</li>
+              <li>Unlimited Wi-Fi access</li>
+              <li>Unlimited treadmill & cardio access</li>
+              <li>2 Official Press On workout tees</li>
+              <li>2 Free guest passes for gym buddies</li>
+            </ul>
+            <button
+              type="button"
+              className="button button-outline tier-select-btn"
+              onClick={() => handleSelectPlan('Annually 12-Months (Regular: ₱7,950 / Student & Senior: ₱7,100)')}
+            >
+              Select Annual ↗
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* 04 — Start Your Membership / Inquiries (Form A + Direct Coach CTA) */}
       <section className="container form-section" id="join">
         <div className="form-intro">
           <SectionHeading
-            eyebrow="03 — Membership & Inquiries"
+            eyebrow="04 — Membership & Inquiries"
             title="Start Your Membership."
             copy="Fill out the quick form below. Inquire about daily walk-ins, monthly memberships, student discounts, or personal training packages. Submissions go straight to carlvine0926@gmail.com and our coaches will confirm your slot."
           />
@@ -231,7 +436,7 @@ export default function Page() {
         </div>
 
         {/* Form A */}
-        <form className="styled-form" onSubmit={(e) => handleFormSubmit(e, 'membership')}>
+        <form className="styled-form" action={formAction} method="POST" onSubmit={(e) => handleFormSubmit(e, 'membership')}>
           <input type="hidden" name="_subject" value="🏋️ New Membership Registration - Presson Fitness Gym" />
           <input type="hidden" name="_template" value="table" />
           <input type="hidden" name="_captcha" value="false" />
@@ -247,13 +452,12 @@ export default function Page() {
               onChange={(e) => setSelectedPlan(e.target.value)}
             >
               <option value="" disabled>Choose a membership option</option>
-              <option value="Daily Session / Day Pass">Daily Session / Day Pass</option>
-              <option value="Monthly Membership (Regular)">Monthly Membership (Regular)</option>
-              <option value="Student / Senior Monthly Membership">Student / Senior Monthly Membership</option>
-              <option value="Quarterly Membership (3 Months)">Quarterly Membership (3 Months)</option>
-              <option value="Annual Membership (12 Months)">Annual Membership (12 Months)</option>
+              <option value="Daily Session (Regular: ₱65 / Student & Senior: ₱60)">Daily Session (Regular: ₱65 / Student & Senior: ₱60)</option>
+              <option value="Monthly Session (Regular: ₱750 / Student & Senior: ₱700)">Monthly Session (Regular: ₱750 / Student & Senior: ₱700)</option>
+              <option value="Quarterly 3-Months (Regular: ₱2,100 / Student: ₱1,900)">Quarterly 3-Months (Regular: ₱2,100 / Student: ₱1,900)</option>
+              <option value="Annually 12-Months (Regular: ₱7,950 / Student & Senior: ₱7,100)">Annually 12-Months (Regular: ₱7,950 / Student & Senior: ₱7,100)</option>
               <option value="1-on-1 Personal Training Package">1-on-1 Personal Training Package</option>
-              <option value="General Inquiry / Current Promos">General Inquiry / Current Promos</option>
+              <option value="General Inquiry / Other">General Inquiry / Other</option>
             </select>
           </label>
           <label className="field">
@@ -271,6 +475,12 @@ export default function Page() {
           {formStatuses.membership === 'success' && (
             <div className="form-feedback success">
               <strong>✓ Form sent successfully!</strong> Your details have been delivered directly to <strong>carlvine0926@gmail.com</strong>. Coach will reach out via SMS or Phone Call shortly.
+            </div>
+          )}
+
+          {formStatuses.membership === 'error' && (
+            <div className="form-feedback error">
+              <strong>Notice:</strong> {formMessages.membership || 'Unable to submit right now. Please try again or reach out directly at 0927 066 0386.'}
             </div>
           )}
 
@@ -339,7 +549,7 @@ export default function Page() {
           </div>
 
           {/* Form B */}
-          <form className="styled-form dark-form" onSubmit={(e) => handleFormSubmit(e, 'booking')}>
+          <form className="styled-form dark-form" action={formAction} method="POST" onSubmit={(e) => handleFormSubmit(e, 'booking')}>
             <input type="hidden" name="_subject" value="⚡ New Coaching Slot Booking - Presson Fitness Gym" />
             <input type="hidden" name="_template" value="table" />
             <input type="hidden" name="_captcha" value="false" />
@@ -372,6 +582,12 @@ export default function Page() {
                 <strong>✓ Session request sent!</strong> Your details have been emailed directly to <strong>carlvine0926@gmail.com</strong>. Coach will reach out via SMS or Phone Call to confirm your schedule.
               </div>
             )}
+
+            {formStatuses.booking === 'error' && (
+              <div className="form-feedback error">
+                <strong>Notice:</strong> {formMessages.booking || 'Unable to submit right now. Please try again or reach out directly at 0927 066 0386.'}
+              </div>
+            )}
           </form>
         </div>
       </section>
@@ -389,14 +605,81 @@ export default function Page() {
           </a>
         </div>
         <div className="gallery-grid-6">
-          <div className="gallery-tile tile-one"><span>TRAIN</span></div>
-          <div className="gallery-tile tile-two"><span>RECOVER</span></div>
-          <div className="gallery-tile tile-three"><span>REPEAT</span></div>
-          <div className="gallery-tile tile-four"><span>STRENGTH</span></div>
-          <div className="gallery-tile tile-five"><span>COACHING</span></div>
-          <div className="gallery-tile tile-six"><span>COMMUNITY</span></div>
+          {galleryItems.map((item, idx) => (
+            <div
+              key={idx}
+              className={`gallery-tile ${item.className}`}
+              tabIndex={0}
+              role="button"
+              aria-label={`View ${item.title}`}
+              onClick={() => setLightboxIndex(idx)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  setLightboxIndex(idx)
+                }
+              }}
+            >
+              <div className="tile-content">
+                <span className="tile-tag">{item.tag}</span>
+                <span className="tile-label">{item.label}</span>
+                <span className="tile-hint">Click to enlarge ↗</span>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
+
+      {/* Gallery Lightbox Modal */}
+      {lightboxIndex !== null && (
+        <div
+          className="gallery-lightbox active"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Gallery Image Preview"
+          onClick={() => setLightboxIndex(null)}
+        >
+          <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="lightbox-close-btn"
+              aria-label="Close preview"
+              onClick={() => setLightboxIndex(null)}
+            >
+              &times;
+            </button>
+            <button
+              className="lightbox-nav-btn lightbox-prev-btn"
+              aria-label="Previous image"
+              onClick={() =>
+                setLightboxIndex((lightboxIndex - 1 + galleryItems.length) % galleryItems.length)
+              }
+            >
+              &#8592;
+            </button>
+            <div className="lightbox-img-wrapper">
+              <img
+                className="lightbox-img"
+                src={galleryItems[lightboxIndex].img}
+                alt={galleryItems[lightboxIndex].title}
+              />
+            </div>
+            <button
+              className="lightbox-nav-btn lightbox-next-btn"
+              aria-label="Next image"
+              onClick={() => setLightboxIndex((lightboxIndex + 1) % galleryItems.length)}
+            >
+              &#8594;
+            </button>
+            <div className="lightbox-caption-box">
+              <h3 className="lightbox-title">{galleryItems[lightboxIndex].title}</h3>
+              <p className="lightbox-desc">{galleryItems[lightboxIndex].desc}</p>
+              <div className="lightbox-counter">
+                {lightboxIndex + 1} / {galleryItems.length}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 08 — Frequently Asked Questions */}
       <section className="faq-section" id="faq">
@@ -489,7 +772,7 @@ export default function Page() {
           </div>
 
           {/* Form C */}
-          <form className="styled-form" onSubmit={(e) => handleFormSubmit(e, 'contact')}>
+          <form className="styled-form" action={formAction} method="POST" onSubmit={(e) => handleFormSubmit(e, 'contact')}>
             <input type="hidden" name="_subject" value="✉️ New Gym Inquiry - Presson Fitness Gym" />
             <input type="hidden" name="_template" value="table" />
             <input type="hidden" name="_captcha" value="false" />
@@ -514,6 +797,12 @@ export default function Page() {
                 <strong>✓ Message sent!</strong> Your inquiry has been delivered directly to <strong>carlvine0926@gmail.com</strong>. We will reply via email/phone promptly.
               </div>
             )}
+
+            {formStatuses.contact === 'error' && (
+              <div className="form-feedback error">
+                <strong>Notice:</strong> {formMessages.contact || 'Unable to submit right now. Please try again or reach out directly at 0927 066 0386.'}
+              </div>
+            )}
           </form>
         </div>
       </section>
@@ -522,7 +811,7 @@ export default function Page() {
       <footer className="site-footer">
         <div className="container footer-inner">
           <a className="brand" href="#home">
-            <img className="logo-image" src="/images/presson-logo.png" alt="Presson Fitness Gym logo" />
+            <img className="logo-image" src="/images/logo.png" alt="Presson Fitness Gym logo" />
             <span>PRESSON<span>FITNESS GYM</span></span>
           </a>
           <p>© 2026 Presson Fitness Gym. Train harder. Live stronger.</p>

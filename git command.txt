@@ -1,0 +1,5 @@
+git remote add origin https://github.com/jerwinmasagca/presson-fitness-gym.git
+git remote -v
+git push -u origin main
+git log -n 3 --oneline
+git status
