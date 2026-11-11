@@ -24,54 +24,74 @@
         <span>PRESSON<span>FITNESS GYM</span></span>
       </a>
 
-      <!-- Mobile Hamburger Button -->
-      <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle navigation menu" aria-expanded="false">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
+      <div class="header-mobile-actions">
+        <button type="button" class="nav-search-btn mobile-search-trigger" id="mobileSearchBtn" aria-label="Search rates, parking, or services">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"></circle>
+            <line x1="20" y1="20" x2="16.2" y2="16.2"></line>
+          </svg>
+        </button>
+
+        <!-- Mobile Hamburger Button -->
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
 
       <!-- Navigation Menu -->
       <nav class="nav-menu" id="navMenu" aria-label="Main Navigation">
         <a href="#home" class="nav-link active">Home</a>
         <a href="#about" class="nav-link">About Us</a>
         <a href="#rates" class="nav-link">Rates</a>
-        <a href="#facility" class="nav-link">Facility</a>
-        <a href="#services" class="nav-link">Services</a>
-        <a href="#faq" class="nav-link">FAQs</a>
-        <a href="#contact" class="nav-link">Contact</a>
-        <a href="#join" class="nav-cta">Join / Inquire</a>
+        <a href="#gallery" class="nav-link">Gallery</a>
+        <a href="#contact" class="nav-link">Contact Us</a>
+        <button type="button" class="nav-search-btn desktop-search-trigger" id="desktopSearchBtn" aria-label="Search rates, parking, or services">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"></circle>
+            <line x1="20" y1="20" x2="16.2" y2="16.2"></line>
+          </svg>
+        </button>
+        <a href="#join" class="nav-cta">Join Now</a>
       </nav>
     </div>
   </header>
 
+  <!-- Quick Search Modal -->
+  <div class="search-modal-backdrop" id="searchModal" role="dialog" aria-modal="true" aria-label="Search Presson Fitness Gym" style="display: none;">
+    <div class="search-modal">
+      <div class="search-modal-head">
+        <input type="search" id="searchModalInput" class="search-modal-input" placeholder="Search rates, student discount, parking, GCash, coaching...">
+        <button type="button" id="searchModalClose" class="search-modal-close" aria-label="Close search">&times;</button>
+      </div>
+      <div class="search-modal-results" id="searchModalResults"></div>
+    </div>
+  </div>
+
   <main>
     <!-- Hero Section -->
-    <section class="hero" id="home">
-      <div class="hero-copy">
-        <p class="eyebrow">Presson Fitness Gym &middot; Quezon City</p>
-        <h1>Train harder.<br><em>Live stronger.</em></h1>
-        <p class="hero-intro">
-          A dedicated training floor built with heavy iron, certified coaching, cold hydration, and an authentic community.
-        </p>
-        <div class="hero-actions">
-          <a class="button button-gold" href="#join">
-            Join Now <span>&rarr;</span>
-          </a>
-          <a class="button button-outline" href="#services">
-            Book a Session <span>&darr;</span>
-          </a>
+    <section class="hero-banner" id="home" aria-label="Train harder, live stronger at Presson Fitness Gym">
+      <img
+        src="images/hero-athlete.jpg"
+        alt="Muscular bearded Presson Fitness Gym athlete illustration"
+        class="hero-athlete-art"
+      >
+      <div class="container hero-banner-inner">
+        <div class="hero-banner-copy">
+          <h1>
+            TRAIN HARDER.<br>
+            <em>LIVE STRONGER.</em>
+          </h1>
+          <p class="hero-intro">
+            Build your goals with the right energy, refreshing drinks, and a supportive community.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-gold hero-join-btn" href="#join">
+              JOIN NOW <span>&rarr;</span>
+            </a>
+          </div>
         </div>
-        <div class="hero-coach-chip">
-          <span class="chip-dot"></span>
-          <span>Coaches On Duty &middot; <a href="tel:+639270660386">Call Coach: 0927 066 0386 &rarr;</a></span>
-        </div>
-      </div>
-      <div class="hero-art" aria-label="Athlete training at Presson Fitness Gym">
-        <div class="sun-disc"></div>
-        <div class="hero-word">PRESS<br><span>ON</span></div>
-        <div class="art-caption">01 / TRAIN WITH PURPOSE</div>
-        <div class="art-line"></div>
       </div>
     </section>
 
@@ -83,11 +103,10 @@
       <span>COMMUNITY</span>
     </section>
 
-    <!-- 01 — About Us Section (Matching Wireframe) -->
+    <!-- About Us Section -->
     <section class="intro-section container" id="about">
       <div class="about-lead">
         <div class="section-heading">
-          <p class="eyebrow">01 &mdash; About Us</p>
           <h2>Built for the work.</h2>
           <p>
             Presson Fitness Gym is built for people who want to be stronger, healthier, and more disciplined. We provide a clean and motivating space with the right equipment, refreshing drinks, and a supportive community.
@@ -118,11 +137,10 @@
       </div>
     </section>
 
-    <!-- 02 — Products / On-Site Fuel Bar -->
+    <!-- Fuel & Refreshments (Original Dark Band) -->
     <section class="dark-band" id="products">
       <div class="container split-section">
         <div class="section-heading">
-          <p class="eyebrow">02 &mdash; What We Offer</p>
           <h2>Fuel your session.</h2>
           <p>Stay sharp between sets with our on-site fuel bar: pre-workout energy, electrolytes, and cold brew.</p>
         </div>
@@ -162,10 +180,9 @@
       </div>
     </section>
 
-    <!-- 03 — Rates & Membership Pricing Section -->
+    <!-- Rates & Membership Pricing Section -->
     <section class="rates-section container" id="rates">
       <div class="section-heading">
-        <p class="eyebrow">03 &mdash; Rates & Memberships</p>
         <h2>Simple, Transparent Pricing.</h2>
         <p>No hidden maintenance fees. No locked contracts. Pick the plan that fits your training schedule and goals.</p>
       </div>
@@ -267,7 +284,6 @@
     <section class="container form-section" id="join">
       <div class="form-intro">
         <div class="section-heading">
-          <p class="eyebrow">04 &mdash; Membership & Inquiries</p>
           <h2>Start Your Membership.</h2>
           <p>Fill out the quick form below. Inquire about daily walk-ins, monthly memberships, student discounts, or personal training packages. Submissions go straight to carlvine0926@gmail.com and our coaches will confirm your slot.</p>
         </div>
@@ -333,7 +349,6 @@
     <section class="facility-section" id="facility">
       <div class="container">
         <div class="section-center-heading">
-          <p class="eyebrow">04 &mdash; Facility & Gear</p>
           <h2>The Equipment We Have Built For You</h2>
           <p>Everything you need for strength, hypertrophy, conditioning, and recovery. No queueing for benches.</p>
         </div>
@@ -368,7 +383,6 @@
       <div class="container booking-layout">
         <div>
           <div class="section-heading">
-            <p class="eyebrow">06 &mdash; Services & Coaching</p>
             <h2>Book Your Next Session.</h2>
             <p>Whether you want hands-on personal coaching to perfect your squat and deadlift, or want to join our high-energy group strength team.</p>
           </div>
@@ -432,7 +446,6 @@
     <section class="gallery-section container" id="gallery">
       <div class="gallery-title">
         <div class="section-heading">
-          <p class="eyebrow">07 &mdash; Gallery / The Space</p>
           <h2>Come as you are. Leave stronger.</h2>
           <p>Take a look inside our Quezon City facility, the equipment racks, and the athlete community.</p>
         </div>
@@ -507,7 +520,6 @@
     <section class="faq-section" id="faq">
       <div class="container faq-container">
         <div class="section-center-heading">
-          <p class="eyebrow">08 &mdash; Got Questions?</p>
           <h2>Frequently Asked Questions</h2>
           <p>Everything you need to know before stepping foot inside Presson Fitness Gym.</p>
         </div>
@@ -556,7 +568,6 @@
       <div class="container contact-layout">
         <div>
           <div class="section-heading">
-            <p class="eyebrow">09 &mdash; Contact Us</p>
             <h2>Let’s Get To Work.</h2>
             <p>Questions about partnerships, group bookings, or rates? Send us an inquiry or visit us directly.</p>
           </div>

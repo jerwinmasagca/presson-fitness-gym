@@ -43,29 +43,61 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, { passive: true });
 
-  // 3. ScrollSpy / Active Link Highlight
-  const observerOptions = {
-    root: null,
-    rootMargin: '-20% 0px -70% 0px',
-    threshold: 0
-  };
+  // 3. Live Click & ScrollSpy Active Link Highlight
+  const navSectionIds = ['home', 'about', 'rates', 'gallery', 'contact'];
+  let scrollLockUntil = 0;
 
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const id = entry.target.getAttribute('id');
-        navLinks.forEach(link => {
-          if (link.getAttribute('href') === `#${id}`) {
-            link.classList.add('active');
-          } else {
-            link.classList.remove('active');
-          }
-        });
+  const setActiveNav = (id) => {
+    navLinks.forEach(link => {
+      const isMatch = link.getAttribute('href') === `#${id}`;
+      link.classList.toggle('active', isMatch);
+      if (isMatch) {
+        link.setAttribute('aria-current', 'location');
+      } else {
+        link.removeAttribute('aria-current');
       }
     });
-  }, observerOptions);
+  };
 
-  sections.forEach(section => observer.observe(section));
+  navLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      const targetId = (link.getAttribute('href') || '#home').replace('#', '');
+      scrollLockUntil = Date.now() + 750;
+      setActiveNav(targetId);
+    });
+  });
+
+  const updateActiveOnScroll = () => {
+    if (Date.now() < scrollLockUntil) return;
+
+    if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 40) {
+      setActiveNav('contact');
+      return;
+    }
+
+    const scrollPos = window.scrollY + 140;
+    let currentId = 'home';
+    navSectionIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && scrollPos >= el.offsetTop) {
+        currentId = id;
+      }
+    });
+    setActiveNav(currentId);
+  };
+
+  if (window.location.hash) {
+    const hash = window.location.hash;
+    if (hash === '#about' || hash === '#products') setActiveNav('about');
+    else if (['#rates', '#join', '#facility', '#services'].includes(hash)) setActiveNav('rates');
+    else if (hash === '#gallery' || hash === '#faq') setActiveNav('gallery');
+    else if (hash === '#contact') setActiveNav('contact');
+    else setActiveNav('home');
+  } else {
+    updateActiveOnScroll();
+  }
+
+  window.addEventListener('scroll', updateActiveOnScroll, { passive: true });
 
   // 4. Interactive Plan Selector: Pre-select plan in Form A when clicking pricing card
   const planButtons = document.querySelectorAll('.tier-select-btn');
@@ -240,6 +272,92 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Escape') closeLightbox();
     if (e.key === 'ArrowLeft') updateLightbox(currentGalleryIndex - 1);
     if (e.key === 'ArrowRight') updateLightbox(currentGalleryIndex + 1);
+  });
+
+  // 7. Quick Search Modal
+  const searchModal = document.getElementById('searchModal');
+  const searchInput = document.getElementById('searchModalInput');
+  const searchResults = document.getElementById('searchModalResults');
+  const searchClose = document.getElementById('searchModalClose');
+  const desktopSearchBtn = document.getElementById('desktopSearchBtn');
+  const mobileSearchBtn = document.getElementById('mobileSearchBtn');
+
+  const quickSearchItems = [
+    { title: 'Daily Session Pass', detail: 'Regular ₱65 · Student/Senior ₱60 (Unlimited 8am–10pm)', href: '#rates' },
+    { title: 'Monthly Membership', detail: 'Regular ₱750 · Student/Senior ₱700 (+ Wi-Fi & Treadmill)', href: '#rates' },
+    { title: 'Quarterly & Annual Plans', detail: '3 Months from ₱1,900 · 12 Months from ₱7,100', href: '#rates' },
+    { title: 'Fuel & Refreshments', detail: 'Energy Drinks, Hydration, Fresh Coffee', href: '#products' },
+    { title: 'Parking Location', detail: 'Right beside the Sports Court · Court parking for cars & motorcycles', href: '#contact' },
+    { title: 'Accepted Payment Methods', detail: 'Cash, GCash, Maya, Bank Transfer (Credit/Debit cards not accepted)', href: '#faq' },
+    { title: 'Personal Training & Coaching', detail: '1-on-1 Coaching, Group Strength, Coach Jerwin 0927 066 0386', href: '#services' },
+    { title: 'Gym Equipment & Floor', detail: 'Free Weights, Power Racks, Cables, Treadmills, Wi-Fi', href: '#facility' },
+    { title: 'Facility Photo Gallery', detail: 'View inside the Quezon City gym floor', href: '#gallery' },
+  ];
+
+  const renderSearchResults = (query) => {
+    if (!searchResults) return;
+    const q = (query || '').trim().toLowerCase();
+    const matches = quickSearchItems.filter(item =>
+      !q || item.title.toLowerCase().includes(q) || item.detail.toLowerCase().includes(q)
+    );
+
+    if (matches.length === 0) {
+      searchResults.innerHTML = '<p class="search-empty">No matches found. Try searching "rates", "parking", or "coffee".</p>';
+      return;
+    }
+
+    searchResults.innerHTML = matches
+      .map(item => `
+        <a href="${item.href}" class="search-result-row">
+          <strong>${item.title}</strong>
+          <span>${item.detail}</span>
+        </a>
+      `)
+      .join('');
+
+    searchResults.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        if (searchModal) searchModal.style.display = 'none';
+        const href = link.getAttribute('href') || '#home';
+        scrollLockUntil = Date.now() + 750;
+        if (href === '#about' || href === '#products') setActiveNav('about');
+        else if (['#rates', '#join', '#facility', '#services'].includes(href)) setActiveNav('rates');
+        else if (href === '#gallery' || href === '#faq') setActiveNav('gallery');
+        else if (href === '#contact') setActiveNav('contact');
+        else setActiveNav('home');
+      });
+    });
+  };
+
+  const openSearchModal = () => {
+    if (!searchModal) return;
+    searchModal.style.display = 'flex';
+    if (searchInput) {
+      searchInput.value = '';
+      renderSearchResults('');
+      setTimeout(() => searchInput.focus(), 40);
+    }
+  };
+
+  const closeSearchModal = () => {
+    if (searchModal) searchModal.style.display = 'none';
+  };
+
+  if (desktopSearchBtn) desktopSearchBtn.addEventListener('click', openSearchModal);
+  if (mobileSearchBtn) mobileSearchBtn.addEventListener('click', openSearchModal);
+  if (searchClose) searchClose.addEventListener('click', closeSearchModal);
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => renderSearchResults(e.target.value));
+  }
+  if (searchModal) {
+    searchModal.addEventListener('click', (e) => {
+      if (e.target === searchModal) closeSearchModal();
+    });
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && searchModal && searchModal.style.display === 'flex') {
+      closeSearchModal();
+    }
   });
 });
 

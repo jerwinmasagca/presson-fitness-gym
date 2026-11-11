@@ -101,12 +101,17 @@ nav {
 
 nav a {
   position: relative;
+  color: #5b564c;
   transition: color 0.2s ease;
   padding: 6px 0;
 }
 
 nav a:hover {
-  color: var(--gold);
+  color: var(--black);
+}
+
+nav a.nav-link-active {
+  color: var(--black);
 }
 
 nav a::after {
@@ -115,33 +120,155 @@ nav a::after {
   bottom: 0;
   left: 0;
   width: 0%;
-  height: 2px;
+  height: 2.5px;
   background: var(--gold);
-  transition: width 0.2s ease;
+  transition: width 0.25s ease, background-color 0.2s ease;
 }
 
-nav a:hover::after {
+nav a:hover::after,
+nav a.nav-link-active::after {
   width: 100%;
 }
 
-.nav-cta {
-  border: 1px solid var(--black);
-  padding: 10px 20px !important;
+nav a.nav-link-active::after {
   background: var(--black);
-  color: var(--cream) !important;
-  font: 14px 'Bebas Neue', sans-serif;
+}
+
+.nav-search-btn {
+  background: transparent;
+  border: none;
+  color: var(--black);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 4px;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.nav-search-btn:hover {
+  color: var(--gold);
+  background: rgba(11, 11, 11, 0.05);
+}
+
+.header-mobile-actions {
+  display: none;
+}
+
+.nav-cta {
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  padding: 10px 22px !important;
+  background: var(--gold);
+  color: var(--black) !important;
+  font: 15px 'Bebas Neue', sans-serif;
   letter-spacing: 0.08em;
   transition: all 0.2s ease !important;
 }
 
 .nav-cta:hover {
-  background: var(--gold);
-  border-color: var(--gold);
-  color: var(--black) !important;
+  background: var(--gold-hover);
+  border-color: var(--gold-hover);
+  color: #000 !important;
 }
 
 .nav-cta::after {
   display: none !important;
+}
+
+/* Search Modal */
+.search-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2200;
+  background: rgba(11, 11, 11, 0.72);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 90px 20px 24px;
+}
+
+.search-modal {
+  width: min(620px, 100%);
+  background: var(--cream);
+  color: var(--black);
+  border-radius: 8px;
+  border: 1px solid rgba(11, 11, 11, 0.16);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+
+.search-modal-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line);
+  background: #f5f2ea;
+}
+
+.search-modal-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  color: var(--black);
+  font-family: 'Montserrat', sans-serif;
+}
+
+.search-modal-close {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  color: var(--slate);
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.search-modal-results {
+  max-height: 360px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.search-result-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(11, 11, 11, 0.08);
+  transition: background 0.15s ease;
+}
+
+.search-result-row:last-child {
+  border-bottom: none;
+}
+
+.search-result-row:hover {
+  background: rgba(201, 169, 106, 0.14);
+}
+
+.search-result-row strong {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 19px;
+  letter-spacing: 0.04em;
+  color: var(--black);
+}
+
+.search-result-row span {
+  font-size: 13px;
+  color: var(--slate);
+}
+
+.search-empty {
+  padding: 28px 20px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--slate);
 }
 
 /* Mobile Toggle */
@@ -261,38 +388,75 @@ h1, h2, h3, h4 {
   color: #8c7138;
 }
 
-/* Hero Section */
-.hero {
-  min-height: 640px;
-  display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
-  background: var(--black);
+/* Full-Width Hero Banner (Full-Face Athlete Composition) */
+.hero-banner {
+  position: relative;
+  min-height: 580px;
+  display: flex;
+  align-items: center;
+  background: #0b0b0b;
   color: var(--cream);
+  padding: 76px 0;
   overflow: hidden;
 }
 
-.hero-copy {
-  align-self: center;
-  padding: 90px max(24px, calc((100vw - var(--container-max)) / 2)) 90px max(24px, calc((100vw - var(--container-max)) / 2));
-  padding-right: 60px;
+.hero-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: linear-gradient(
+    90deg,
+    #0b0b0b 0%,
+    rgba(11, 11, 11, 0.94) 38%,
+    rgba(11, 11, 11, 0.45) 62%,
+    rgba(11, 11, 11, 0.08) 85%,
+    transparent 100%
+  );
+  pointer-events: none;
 }
 
-.hero h1 {
-  font-size: clamp(68px, 9vw, 140px);
-  line-height: 0.85;
+.hero-athlete-art {
+  position: absolute;
+  top: 8px;
+  right: 0;
+  height: calc(100% - 8px);
+  width: auto;
+  max-width: none;
+  object-fit: contain;
+  object-position: top right;
+  z-index: 1;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.55) 28%, #000 54%);
+  mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.55) 28%, #000 54%);
 }
 
-.hero h1 em {
+.hero-banner-inner {
+  position: relative;
+  z-index: 3;
+}
+
+.hero-banner-copy {
+  max-width: 580px;
+}
+
+.hero-banner h1 {
+  font-size: clamp(64px, 7.6vw, 114px);
+  line-height: 0.9;
+  color: var(--cream);
+}
+
+.hero-banner h1 em {
   color: var(--gold);
   font-style: normal;
 }
 
-.hero-intro {
-  max-width: 440px;
-  color: #b9b5aa;
-  font-size: 15px;
-  line-height: 1.8;
-  margin: 28px 0 34px;
+.hero-banner .hero-intro {
+  max-width: 470px;
+  color: #dcd8ce;
+  font-size: 16px;
+  line-height: 1.65;
+  margin: 22px 0 32px;
 }
 
 .hero-actions {
@@ -301,102 +465,14 @@ h1, h2, h3, h4 {
   flex-wrap: wrap;
 }
 
-.hero-actions .button-outline {
-  color: var(--cream);
-  border-color: #555;
+.hero-join-btn {
+  border-radius: 6px;
+  min-width: 190px;
+  padding: 15px 26px;
+  font-size: 17px;
 }
 
-.hero-actions .button-outline:hover {
-  border-color: var(--gold);
-  color: var(--gold);
-}
-
-.hero-coach-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 26px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(201, 169, 106, 0.3);
-  padding: 8px 16px;
-  border-radius: 30px;
-  font-size: 13px;
-  color: #ded9cd;
-}
-
-.chip-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #22c55e;
-  box-shadow: 0 0 10px #22c55e;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.85); }
-}
-
-.hero-coach-chip a {
-  color: var(--gold);
-  font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.hero-art {
-  position: relative;
-  background: linear-gradient(135deg, #242424, #0b0b0b);
-  display: flex;
-  align-items: flex-end;
-  padding: 44px;
-  min-height: 440px;
-}
-
-.sun-disc {
-  position: absolute;
-  width: 380px;
-  height: 380px;
-  border-radius: 50%;
-  background: var(--gold);
-  opacity: 0.88;
-  top: 10%;
-  left: 14%;
-  filter: blur(0.5px);
-}
-
-.hero-word {
-  z-index: 1;
-  font: clamp(90px, 12vw, 180px)/0.7 'Bebas Neue';
-  color: var(--black);
-  opacity: 0.92;
-  letter-spacing: -0.04em;
-}
-
-.hero-word span {
-  color: var(--cream);
-}
-
-.art-caption {
-  position: absolute;
-  top: 42px;
-  right: 38px;
-  font-size: 11px;
-  letter-spacing: 0.16em;
-  color: var(--cream);
-  writing-mode: vertical-rl;
-}
-
-.art-line {
-  position: absolute;
-  bottom: 40px;
-  right: 38px;
-  width: 40%;
-  border-top: 1px solid var(--gold);
-}
-
-/* Ticker */
+/* Ticker Bar */
 .ticker {
   display: flex;
   gap: 28px;
@@ -405,8 +481,9 @@ h1, h2, h3, h4 {
   padding: 20px;
   background: #e3ded0;
   border-bottom: 1px solid var(--line);
-  font: 20px 'Bebas Neue';
+  font: 20px 'Bebas Neue', sans-serif;
   letter-spacing: 0.14em;
+  flex-wrap: wrap;
 }
 
 .ticker b {
@@ -414,9 +491,9 @@ h1, h2, h3, h4 {
   font-weight: 400;
 }
 
-/* 01 — About Section */
+/* About Section */
 .intro-section {
-  padding: 120px 0;
+  padding: 110px 0;
   display: grid;
   grid-template-columns: 1fr 1.2fr;
   gap: 80px;
@@ -1565,23 +1642,42 @@ h1, h2, h3, h4 {
 
   nav.nav-active {
     display: flex;
+    align-items: flex-start;
+  }
+
+  .header-mobile-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .desktop-search-trigger {
+    display: none;
   }
 
   .nav-cta {
     align-self: flex-start;
   }
 
-  .hero {
-    grid-template-columns: 1fr;
+  .hero-banner {
+    min-height: 460px;
+    padding: 64px 0;
   }
 
-  .hero-copy {
-    padding: 60px 20px 40px;
-    padding-right: 20px;
+  .hero-banner::before {
+    background: linear-gradient(
+      90deg,
+      rgba(11, 11, 11, 0.96) 0%,
+      rgba(11, 11, 11, 0.85) 60%,
+      rgba(11, 11, 11, 0.55) 100%
+    );
   }
 
-  .hero-art {
-    min-height: 320px;
+  .hero-athlete-art {
+    top: 0;
+    height: 100%;
+    opacity: 0.42;
+    right: -20px;
   }
 
   .intro-section,

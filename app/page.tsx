@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 
 const formAction = 'https://formsubmit.co/carlvine0926@gmail.com'
 const formAjaxAction = 'https://formsubmit.co/ajax/carlvine0926@gmail.com'
@@ -56,6 +56,18 @@ const galleryItems = [
   },
 ]
 
+const quickSearchItems = [
+  { title: 'Daily Session Pass', detail: 'Regular ₱65 · Student/Senior ₱60 (Unlimited 8am–10pm)', href: '#rates' },
+  { title: 'Monthly Membership', detail: 'Regular ₱750 · Student/Senior ₱700 (+ Wi-Fi & Treadmill)', href: '#rates' },
+  { title: 'Quarterly & Annual Plans', detail: '3 Months from ₱1,900 · 12 Months from ₱7,100', href: '#rates' },
+  { title: 'Fuel & Refreshments', detail: 'Energy Drinks, Hydration, Fresh Coffee', href: '#products' },
+  { title: 'Parking Location', detail: 'Right beside the Sports Court · Court parking for cars & motorcycles', href: '#contact' },
+  { title: 'Accepted Payment Methods', detail: 'Cash, GCash, Maya, Bank Transfer (Credit/Debit cards not accepted)', href: '#faq' },
+  { title: 'Personal Training & Coaching', detail: '1-on-1 Coaching, Group Strength, Coach Jerwin 0927 066 0386', href: '#services' },
+  { title: 'Gym Equipment & Floor', detail: 'Free Weights, Power Racks, Cables, Treadmills, Wi-Fi', href: '#facility' },
+  { title: 'Facility Photo Gallery', detail: 'View inside the Quezon City gym floor', href: '#gallery' },
+]
+
 function Field({
   label,
   name,
@@ -77,19 +89,53 @@ function Field({
   )
 }
 
-function SectionHeading({ eyebrow, title, copy }: { eyebrow: string; title: string; copy: string }) {
+function SectionHeading({ eyebrow, title, copy }: { eyebrow?: string; title: string; copy: string }) {
   return (
     <div className="section-heading">
-      <p className="eyebrow">{eyebrow}</p>
+      {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
       <h2>{title}</h2>
       <p>{copy}</p>
     </div>
   )
 }
 
+const navItems = [
+  { id: 'home', label: 'Home', href: '#home' },
+  { id: 'about', label: 'About Us', href: '#about' },
+  { id: 'rates', label: 'Rates', href: '#rates' },
+  { id: 'gallery', label: 'Gallery', href: '#gallery' },
+  { id: 'contact', label: 'Contact Us', href: '#contact' },
+] as const
+
+type NavSectionId = (typeof navItems)[number]['id']
+
+function mapHrefToNavSection(href: string): NavSectionId {
+  switch (href) {
+    case '#about':
+    case '#products':
+      return 'about'
+    case '#rates':
+    case '#join':
+    case '#facility':
+    case '#services':
+      return 'rates'
+    case '#gallery':
+    case '#faq':
+      return 'gallery'
+    case '#contact':
+      return 'contact'
+    default:
+      return 'home'
+  }
+}
+
 export default function Page() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [activeSection, setActiveSection] = useState<NavSectionId>('home')
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
   const [selectedPlan, setSelectedPlan] = useState('')
+  const scrollLockUntilRef = useRef<number>(0)
   const [formStatuses, setFormStatuses] = useState<{ [key: string]: 'idle' | 'submitting' | 'success' | 'error' }>({
     membership: 'idle',
     booking: 'idle',
@@ -101,6 +147,51 @@ export default function Page() {
     contact: '',
   })
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+
+  useEffect(() => {
+    const updateActiveFromScroll = () => {
+      if (Date.now() < scrollLockUntilRef.current) return
+
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 40) {
+        setActiveSection('contact')
+        return
+      }
+
+      const scrollPos = window.scrollY + 140
+      let current: NavSectionId = 'home'
+      for (const item of navItems) {
+        const el = document.getElementById(item.id)
+        if (el && scrollPos >= el.offsetTop) {
+          current = item.id
+        }
+      }
+      setActiveSection(current)
+    }
+
+    if (window.location.hash) {
+      setActiveSection(mapHrefToNavSection(window.location.hash))
+    } else {
+      updateActiveFromScroll()
+    }
+
+    window.addEventListener('scroll', updateActiveFromScroll, { passive: true })
+    return () => window.removeEventListener('scroll', updateActiveFromScroll)
+  }, [])
+
+  useEffect(() => {
+    if (!searchOpen) return
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSearchOpen(false)
+    }
+    window.addEventListener('keydown', handleEsc)
+    return () => window.removeEventListener('keydown', handleEsc)
+  }, [searchOpen])
+
+  const filteredSearchItems = quickSearchItems.filter(item => {
+    const q = searchQuery.trim().toLowerCase()
+    if (!q) return true
+    return item.title.toLowerCase().includes(q) || item.detail.toLowerCase().includes(q)
+  })
 
   useEffect(() => {
     if (lightboxIndex === null) return
@@ -119,8 +210,16 @@ export default function Page() {
 
   const closeMenu = () => setMobileMenuOpen(false)
 
+  const handleNavClick = (id: NavSectionId) => {
+    scrollLockUntilRef.current = Date.now() + 750
+    setActiveSection(id)
+    setMobileMenuOpen(false)
+  }
+
   const handleSelectPlan = (plan: string) => {
     setSelectedPlan(plan)
+    scrollLockUntilRef.current = Date.now() + 750
+    setActiveSection('rates')
     if (typeof document !== 'undefined') {
       const joinEl = document.getElementById('join')
       if (joinEl) {
@@ -167,65 +266,145 @@ export default function Page() {
     <main>
       {/* Sticky Header Navigation */}
       <header className="site-header">
-        <a className="brand" href="#home" aria-label="Presson Fitness Gym home">
+        <a
+          className="brand"
+          href="#home"
+          aria-label="Presson Fitness Gym home"
+          onClick={() => handleNavClick('home')}
+        >
           <img className="logo-image" src="/images/logo.png" alt="Presson Fitness Gym logo" />
           <span>PRESSON<span>FITNESS GYM</span></span>
         </a>
 
-        {/* Mobile Menu Toggle */}
-        <button
-          className="mobile-toggle"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          aria-label="Toggle navigation menu"
-        >
-          {mobileMenuOpen ? '✕' : '☰'}
-        </button>
+        <div className="header-mobile-actions">
+          <button
+            type="button"
+            className="nav-search-btn mobile-search-trigger"
+            onClick={() => setSearchOpen(true)}
+            aria-label="Search rates, parking, or services"
+          >
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="7" />
+              <line x1="20" y1="20" x2="16.2" y2="16.2" />
+            </svg>
+          </button>
+
+          <button
+            className="mobile-toggle"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle navigation menu"
+          >
+            {mobileMenuOpen ? '✕' : '☰'}
+          </button>
+        </div>
 
         {/* Navigation Menu */}
         <nav aria-label="Primary navigation" className={mobileMenuOpen ? 'nav-active' : ''}>
-          <a href="#home" onClick={closeMenu}>Home</a>
-          <a href="#about" onClick={closeMenu}>About Us</a>
-          <a href="#rates" onClick={closeMenu}>Rates</a>
-          <a href="#facility" onClick={closeMenu}>Facility</a>
-          <a href="#services" onClick={closeMenu}>Services</a>
-          <a href="#gallery" onClick={closeMenu}>Gallery</a>
-          <a href="#faq" onClick={closeMenu}>FAQs</a>
-          <a href="#contact" onClick={closeMenu}>Contact</a>
-          <a className="nav-cta" href="#join" onClick={closeMenu}>Join / Inquire</a>
+          {navItems.map((item) => (
+            <a
+              key={item.id}
+              href={item.href}
+              className={activeSection === item.id ? 'nav-link-active' : ''}
+              aria-current={activeSection === item.id ? 'location' : undefined}
+              onClick={() => handleNavClick(item.id)}
+            >
+              {item.label}
+            </a>
+          ))}
+
+          <button
+            type="button"
+            className="nav-search-btn desktop-search-trigger"
+            onClick={() => {
+              closeMenu()
+              setSearchOpen(true)
+            }}
+            aria-label="Search rates, parking, or services"
+          >
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="7" />
+              <line x1="20" y1="20" x2="16.2" y2="16.2" />
+            </svg>
+          </button>
+
+          <a className="nav-cta" href="#join" onClick={() => handleNavClick('rates')}>Join Now</a>
         </nav>
       </header>
 
-      {/* Hero Section */}
-      <section className="hero" id="home">
-        <div className="hero-copy">
-          <p className="eyebrow">Presson Fitness Gym &middot; Quezon City</p>
-          <h1>Train harder.<br /><em>Live stronger.</em></h1>
-          <p className="hero-intro">
-            A dedicated training floor built with heavy iron, certified coaching, cold hydration, and an authentic community.
-          </p>
-          <div className="hero-actions">
-            <a className="button button-gold" href="#join">
-              Join now <span>→</span>
-            </a>
-            <a className="button button-outline" href="#services">
-              Book a Session <span>↓</span>
-            </a>
-          </div>
-          <div className="hero-coach-chip">
-            <span className="chip-dot"></span>
-            <span>
-              Coaches On Duty &middot;{' '}
-              <a href="tel:+639270660386">
-                Call Coach: 0927 066 0386 &rarr;
-              </a>
-            </span>
+      {/* Quick Search Modal */}
+      {searchOpen && (
+        <div
+          className="search-modal-backdrop"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Search Presson Fitness Gym"
+          onClick={() => setSearchOpen(false)}
+        >
+          <div className="search-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="search-modal-head">
+              <input
+                type="search"
+                className="search-modal-input"
+                placeholder="Search rates, student discount, parking, GCash, coaching..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                autoFocus
+              />
+              <button
+                type="button"
+                className="search-modal-close"
+                aria-label="Close search"
+                onClick={() => setSearchOpen(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="search-modal-results">
+              {filteredSearchItems.length > 0 ? (
+                filteredSearchItems.map((item, idx) => (
+                  <a
+                    key={idx}
+                    href={item.href}
+                    className="search-result-row"
+                    onClick={() => {
+                      setSearchOpen(false)
+                      handleNavClick(mapHrefToNavSection(item.href))
+                    }}
+                  >
+                    <strong>{item.title}</strong>
+                    <span>{item.detail}</span>
+                  </a>
+                ))
+              ) : (
+                <p className="search-empty">No matches found. Try searching &ldquo;rates&rdquo;, &ldquo;parking&rdquo;, or &ldquo;coffee&rdquo;.</p>
+              )}
+            </div>
           </div>
         </div>
-        <div className="hero-art" aria-label="Athlete training at Presson Fitness Gym">
-          <div className="sun-disc" />
-          <div className="hero-word">PRESS<br /><span>ON</span></div>
-          <div className="art-caption">01 / TRAIN WITH PURPOSE</div>
-          <div className="art-line" />
+      )}
+
+      {/* Hero Section */}
+      <section className="hero-banner" id="home" aria-label="Train harder, live stronger at Presson Fitness Gym">
+        <img
+          src="/images/hero-athlete.jpg"
+          alt="Muscular bearded Presson Fitness Gym athlete illustration"
+          className="hero-athlete-art"
+        />
+        <div className="container hero-banner-inner">
+          <div className="hero-banner-copy">
+            <h1>
+              TRAIN HARDER.<br />
+              <em>LIVE STRONGER.</em>
+            </h1>
+            <p className="hero-intro">
+              Build your goals with the right energy, refreshing drinks, and a supportive community.
+            </p>
+            <div className="hero-actions">
+              <a className="button button-gold hero-join-btn" href="#join">
+                JOIN NOW <span>→</span>
+              </a>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -234,11 +413,10 @@ export default function Page() {
         <span>DISCIPLINE</span><b>+</b><span>POWER</span><b>+</b><span>PROGRESS</span><b>+</b><span>COMMUNITY</span>
       </section>
 
-      {/* 01 — About Us Section */}
+      {/* About Us Section */}
       <section className="intro-section container" id="about">
         <div>
           <SectionHeading
-            eyebrow="01 — About Us"
             title="Built for the work."
             copy="Presson Fitness Gym is built for people who want to be stronger, healthier, and more disciplined. We provide a clean and motivating space with the right equipment, refreshing drinks, and a supportive community."
           />
@@ -267,11 +445,10 @@ export default function Page() {
         </div>
       </section>
 
-      {/* 02 — Products / What We Offer */}
+      {/* Fuel & Refreshments (Original Dark Band) */}
       <section className="dark-band" id="products">
         <div className="container split-section">
           <SectionHeading
-            eyebrow="02 — What We Offer"
             title="Fuel your session."
             copy="Stay sharp between sets with our hand-picked on-site range of pre-workout energy, electrolytes, and cold brew."
           />
@@ -295,10 +472,9 @@ export default function Page() {
         </div>
       </section>
 
-      {/* 03 — Rates & Membership Pricing Section */}
+      {/* Rates & Membership Pricing Section */}
       <section className="rates-section container" id="rates">
         <SectionHeading
-          eyebrow="03 — Rates & Memberships"
           title="Simple, Transparent Pricing."
           copy="No hidden maintenance fees. No locked contracts. Pick the plan that fits your training schedule and goals."
         />
@@ -416,7 +592,6 @@ export default function Page() {
       <section className="container form-section" id="join">
         <div className="form-intro">
           <SectionHeading
-            eyebrow="04 — Membership & Inquiries"
             title="Start Your Membership."
             copy="Fill out the quick form below. Inquire about daily walk-ins, monthly memberships, student discounts, or personal training packages. Submissions go straight to carlvine0926@gmail.com and our coaches will confirm your slot."
           />
@@ -496,7 +671,6 @@ export default function Page() {
       <section className="facility-section" id="facility">
         <div className="container">
           <div className="section-center-heading">
-            <p className="eyebrow">04 — Facility & Gear</p>
             <h2>The Equipment We Have Built For You</h2>
             <p>Everything you need for strength, hypertrophy, conditioning, and recovery. No queueing for benches.</p>
           </div>
@@ -531,7 +705,6 @@ export default function Page() {
         <div className="container booking-layout">
           <div>
             <SectionHeading
-              eyebrow="06 — Services & Coaching"
               title="Book Your Next Session."
               copy="Whether you want hands-on personal coaching to perfect your squat and deadlift, or want to join our high-energy group strength team."
             />
@@ -598,7 +771,6 @@ export default function Page() {
       <section className="gallery-section container" id="gallery">
         <div className="gallery-title">
           <SectionHeading
-            eyebrow="07 — Gallery / The Space"
             title="Come as you are. Leave stronger."
             copy="Take a look inside our Quezon City facility, the equipment racks, and the athlete community."
           />
@@ -687,7 +859,6 @@ export default function Page() {
       <section className="faq-section" id="faq">
         <div className="container faq-container">
           <div className="section-center-heading">
-            <p className="eyebrow">08 — Got Questions?</p>
             <h2>Frequently Asked Questions</h2>
             <p>Everything you need to know before stepping foot inside Presson Fitness Gym.</p>
           </div>
@@ -736,7 +907,6 @@ export default function Page() {
         <div className="container contact-layout">
           <div>
             <SectionHeading
-              eyebrow="09 — Contact Us"
               title="Let’s Get To Work."
               copy="Questions about partnerships, group bookings, or rates? Send us an inquiry or visit us directly."
             />
