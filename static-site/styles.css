@@ -1708,9 +1708,7 @@ h4 {
   font-size: 13px;
   line-height: 1.6;
   margin-top: 10px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  display: block;
 }
 
 .form-feedback.success {

@@ -121,7 +121,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // 5. Asynchronous Form Submission to carlvine0926@gmail.com
+  // 5. Asynchronous Form Submission (testing recipient; switch back to carlvine0926@gmail.com for client)
+  const FORM_RECIPIENT_EMAIL = 'jerwinmasagca@gmail.com';
   const forms = document.querySelectorAll('form.styled-form');
   forms.forEach(form => {
     form.addEventListener('submit', async (e) => {
@@ -140,12 +141,24 @@ document.addEventListener('DOMContentLoaded', () => {
         feedbackDiv.className = 'form-feedback';
       }
 
+      const showError = (text) => {
+        if (!feedbackDiv) return;
+        feedbackDiv.style.display = 'block';
+        feedbackDiv.className = 'form-feedback error';
+        feedbackDiv.textContent = '';
+        const strong = document.createElement('strong');
+        strong.textContent = 'Notice: ';
+        const span = document.createElement('span');
+        span.textContent = /activat/i.test(text)
+          ? `${text} Check ${FORM_RECIPIENT_EMAIL} (including Spam/Promotions), click "Activate Form" in the email from FormSubmit, then submit again.`
+          : text;
+        feedbackDiv.appendChild(strong);
+        feedbackDiv.appendChild(span);
+      };
+
       try {
         const formData = new FormData(form);
-        // FormSubmit requires /ajax/ endpoint for XMLHttpRequest / Fetch requests
-        const ajaxUrl = form.action.includes('/ajax/')
-          ? form.action
-          : form.action.replace('formsubmit.co/', 'formsubmit.co/ajax/');
+        const ajaxUrl = `https://formsubmit.co/ajax/${FORM_RECIPIENT_EMAIL}`;
 
         const response = await fetch(ajaxUrl, {
           method: 'POST',
@@ -159,25 +172,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (response.ok && data && (data.success === 'true' || data.success === true)) {
           if (feedbackDiv) {
-            feedbackDiv.style.display = 'flex';
+            feedbackDiv.style.display = 'block';
             feedbackDiv.className = 'form-feedback success';
-            feedbackDiv.innerHTML = '<strong>✓ Form sent successfully!</strong> Your submission has been delivered directly to <strong>carlvine0926@gmail.com</strong>. Coach will reach out via SMS or Phone Call shortly.';
+            feedbackDiv.innerHTML = `<strong>✓ Form sent successfully!</strong> Your submission has been delivered directly to <strong>${FORM_RECIPIENT_EMAIL}</strong>. Coach will reach out via SMS or Phone Call shortly.`;
           }
           form.reset();
         } else if (data && data.message) {
-          if (feedbackDiv) {
-            feedbackDiv.style.display = 'flex';
-            feedbackDiv.className = 'form-feedback error';
-            feedbackDiv.innerHTML = `<strong>Notice:</strong> ${data.message}`;
-          }
+          showError(String(data.message));
         } else {
-          // Fallback if service returns status error
-          form.submit();
+          showError(`Unable to send via AJAX right now (status ${response.status}). Make sure you are running on http://localhost or email ${FORM_RECIPIENT_EMAIL} directly.`);
         }
       } catch (err) {
         console.error('Submission error:', err);
-        // Fallback to standard HTTP POST if fetch fails
-        form.submit();
+        showError(`Network request blocked or failed. Make sure you are running via a local server (http://localhost) rather than file://, or email ${FORM_RECIPIENT_EMAIL} directly.`);
       } finally {
         if (submitBtn) {
           submitBtn.disabled = false;

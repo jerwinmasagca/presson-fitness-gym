@@ -1,9 +1,11 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
-
-const formAction = 'https://formsubmit.co/carlvine0926@gmail.com'
-const formAjaxAction = 'https://formsubmit.co/ajax/carlvine0926@gmail.com'
+import {
+  CONTACT_API_ENDPOINT,
+  FORM_RECIPIENT_EMAIL,
+  submitContactForm,
+} from '@/lib/formsubmit'
 
 const galleryItems = [
   {
@@ -233,33 +235,20 @@ export default function Page() {
     setFormStatuses(prev => ({ ...prev, [formKey]: 'submitting' }))
     setFormMessages(prev => ({ ...prev, [formKey]: '' }))
     const form = e.currentTarget
-    const formData = new FormData(form)
+    const result = await submitContactForm(form)
 
-    try {
-      const res = await fetch(formAjaxAction, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          Accept: 'application/json',
-        },
-      })
-
-      const data = await res.json().catch(() => null)
-
-      if (res.ok && data && (data.success === 'true' || data.success === true)) {
-        setFormStatuses(prev => ({ ...prev, [formKey]: 'success' }))
-        setFormMessages(prev => ({ ...prev, [formKey]: '' }))
-        form.reset()
-      } else if (data && data.message) {
-        setFormStatuses(prev => ({ ...prev, [formKey]: 'error' }))
-        setFormMessages(prev => ({ ...prev, [formKey]: data.message }))
-      } else {
-        form.submit()
+    if (result.ok) {
+      setFormStatuses(prev => ({ ...prev, [formKey]: 'success' }))
+      setFormMessages(prev => ({ ...prev, [formKey]: '' }))
+      form.reset()
+      if (formKey === 'membership') {
+        setSelectedPlan('')
       }
-    } catch (err) {
-      console.error('Submission error:', err)
-      form.submit()
+      return
     }
+
+    setFormStatuses(prev => ({ ...prev, [formKey]: 'error' }))
+    setFormMessages(prev => ({ ...prev, [formKey]: result.message }))
   }
 
   return (
@@ -593,7 +582,7 @@ export default function Page() {
         <div className="form-intro">
           <SectionHeading
             title="Start Your Membership."
-            copy="Fill out the quick form below. Inquire about daily walk-ins, monthly memberships, student discounts, or personal training packages. Submissions go straight to carlvine0926@gmail.com and our coaches will confirm your slot."
+            copy={`Fill out the quick form below. Inquire about daily walk-ins, monthly memberships, student discounts, or personal training packages. Submissions go straight to ${FORM_RECIPIENT_EMAIL} and our coaches will confirm your slot.`}
           />
 
           <div className="direct-coach-card">
@@ -611,11 +600,8 @@ export default function Page() {
         </div>
 
         {/* Form A */}
-        <form className="styled-form" action={formAction} method="POST" onSubmit={(e) => handleFormSubmit(e, 'membership')}>
-          <input type="hidden" name="_subject" value="🏋️ New Membership Registration - Presson Fitness Gym" />
-          <input type="hidden" name="_template" value="table" />
-          <input type="hidden" name="_captcha" value="false" />
-          <input type="hidden" name="form_name" value="Start Your Membership (Form A)" />
+        <form className="styled-form" action={CONTACT_API_ENDPOINT} method="POST" onSubmit={(e) => handleFormSubmit(e, 'membership')}>
+          <input type="hidden" name="form_type" value="membership" />
           <Field label="Full Name *" name="name" placeholder="Juan dela Cruz" />
           <Field label="Phone / Mobile Number *" name="phone" type="tel" placeholder="0927 066 0386" />
           <label className="field">
@@ -649,18 +635,18 @@ export default function Page() {
 
           {formStatuses.membership === 'success' && (
             <div className="form-feedback success">
-              <strong>✓ Form sent successfully!</strong> Your details have been delivered directly to <strong>carlvine0926@gmail.com</strong>. Coach will reach out via SMS or Phone Call shortly.
+              <span><strong>✓ Form sent successfully!</strong> Your details have been delivered directly to <strong>{FORM_RECIPIENT_EMAIL}</strong>. Coach will reach out via SMS or Phone Call shortly.</span>
             </div>
           )}
 
           {formStatuses.membership === 'error' && (
             <div className="form-feedback error">
-              <strong>Notice:</strong> {formMessages.membership || 'Unable to submit right now. Please try again or reach out directly at 0927 066 0386.'}
+              <span><strong>Notice:</strong> {formMessages.membership || 'Unable to submit right now. Please try again or reach out directly at 0927 066 0386.'}</span>
             </div>
           )}
 
           <p className="form-disclaimer">
-            All details sent directly to <strong>carlvine0926@gmail.com</strong>. We confirm via SMS or Phone Call within 2 business hours.
+            All details sent directly to <strong>{FORM_RECIPIENT_EMAIL}</strong>. We confirm via SMS or Phone Call within 2 business hours.
             <br />
             <strong>Payments Accepted:</strong> Cash &amp; Online (GCash, Maya, Bank Transfer) &middot; <em>No cards accepted</em>
           </p>
@@ -724,11 +710,8 @@ export default function Page() {
           </div>
 
           {/* Form B */}
-          <form className="styled-form dark-form" action={formAction} method="POST" onSubmit={(e) => handleFormSubmit(e, 'booking')}>
-            <input type="hidden" name="_subject" value="⚡ New Coaching Slot Booking - Presson Fitness Gym" />
-            <input type="hidden" name="_template" value="table" />
-            <input type="hidden" name="_captcha" value="false" />
-            <input type="hidden" name="form_name" value="Book Your Next Session (Form B)" />
+          <form className="styled-form dark-form" action={CONTACT_API_ENDPOINT} method="POST" onSubmit={(e) => handleFormSubmit(e, 'booking')}>
+            <input type="hidden" name="form_type" value="booking" />
             <h3 className="form-title">Reserve a Coaching Slot</h3>
             <Field label="Full Name *" name="name" placeholder="Juan dela Cruz" />
             <Field label="Phone Number *" name="phone" type="tel" placeholder="0927 066 0386" />
@@ -754,13 +737,13 @@ export default function Page() {
 
             {formStatuses.booking === 'success' && (
               <div className="form-feedback success">
-                <strong>✓ Session request sent!</strong> Your details have been emailed directly to <strong>carlvine0926@gmail.com</strong>. Coach will reach out via SMS or Phone Call to confirm your schedule.
+                <span><strong>✓ Session request sent!</strong> Your details have been emailed directly to <strong>{FORM_RECIPIENT_EMAIL}</strong>. Coach will reach out via SMS or Phone Call to confirm your schedule.</span>
               </div>
             )}
 
             {formStatuses.booking === 'error' && (
               <div className="form-feedback error">
-                <strong>Notice:</strong> {formMessages.booking || 'Unable to submit right now. Please try again or reach out directly at 0927 066 0386.'}
+                <span><strong>Notice:</strong> {formMessages.booking || 'Unable to submit right now. Please try again or reach out directly at 0927 066 0386.'}</span>
               </div>
             )}
           </form>
@@ -952,11 +935,8 @@ export default function Page() {
           </div>
 
           {/* Form C */}
-          <form className="styled-form" action={formAction} method="POST" onSubmit={(e) => handleFormSubmit(e, 'contact')}>
-            <input type="hidden" name="_subject" value="✉️ New Gym Inquiry - Presson Fitness Gym" />
-            <input type="hidden" name="_template" value="table" />
-            <input type="hidden" name="_captcha" value="false" />
-            <input type="hidden" name="form_name" value="Contact Us (Form C)" />
+          <form className="styled-form" action={CONTACT_API_ENDPOINT} method="POST" onSubmit={(e) => handleFormSubmit(e, 'contact')}>
+            <input type="hidden" name="form_type" value="contact" />
             <h3 className="form-title">Send Direct Inquiry</h3>
             <Field label="Full Name *" name="name" placeholder="Juan dela Cruz" />
             <Field label="Email Address *" name="email" type="email" placeholder="juan@example.com" />
@@ -974,13 +954,13 @@ export default function Page() {
 
             {formStatuses.contact === 'success' && (
               <div className="form-feedback success">
-                <strong>✓ Message sent!</strong> Your inquiry has been delivered directly to <strong>carlvine0926@gmail.com</strong>. We will reply via email/phone promptly.
+                <span><strong>✓ Message sent!</strong> Your inquiry has been delivered directly to <strong>{FORM_RECIPIENT_EMAIL}</strong>. We will reply via email/phone promptly.</span>
               </div>
             )}
 
             {formStatuses.contact === 'error' && (
               <div className="form-feedback error">
-                <strong>Notice:</strong> {formMessages.contact || 'Unable to submit right now. Please try again or reach out directly at 0927 066 0386.'}
+                <span><strong>Notice:</strong> {formMessages.contact || 'Unable to submit right now. Please try again or reach out directly at 0927 066 0386.'}</span>
               </div>
             )}
           </form>
