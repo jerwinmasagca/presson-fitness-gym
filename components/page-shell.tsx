@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { ScrollProgressBar, useScrollReveal } from '@/components/scroll-effects'
 
 const innerNavLinks = [
   { href: '/', label: 'Home' },
@@ -16,6 +17,7 @@ const innerNavLinks = [
 export function PageShell({ eyebrow, title, copy, children }: { eyebrow: string; title: string; copy: string; children: React.ReactNode }) {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  useScrollReveal()
 
   return (
     <main>
@@ -53,6 +55,7 @@ export function PageShell({ eyebrow, title, copy, children }: { eyebrow: string;
             Join now
           </Link>
         </nav>
+        <ScrollProgressBar />
       </header>
 
       <section className="page-hero container">

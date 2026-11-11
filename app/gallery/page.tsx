@@ -65,6 +65,8 @@ export default function GalleryPage() {
             <div
               key={photo.id}
               className="gallery-card"
+              data-reveal=""
+              style={{ '--reveal-delay': `${idx * 90}ms` } as React.CSSProperties}
               tabIndex={0}
               role="button"
               aria-label={`View ${photo.title} photo`}
@@ -96,7 +98,7 @@ export default function GalleryPage() {
         </section>
 
         {/* Call to action */}
-        <section className="gallery-page-cta">
+        <section className="gallery-page-cta" data-reveal="">
           <h2>Ready to experience the space in person?</h2>
           <p>
             Drop by for a walk-through, meet our coaches, and see the facility for yourself.

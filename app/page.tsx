@@ -18,6 +18,13 @@ import {
   TimePickerField,
   type SelectOption,
 } from '@/components/form-controls'
+import { ScrollProgressBar, useScrollReveal } from '@/components/scroll-effects'
+
+function revealDelay(index: number, stepMs = 80): React.CSSProperties {
+  return { '--reveal-delay': `${index * stepMs}ms` } as React.CSSProperties
+}
+
+const TICKER_VALUES = ['DISCIPLINE', 'POWER', 'PROGRESS', 'COMMUNITY'] as const
 import {
   CONTACT_API_ENDPOINT,
   FORM_RECIPIENT_EMAIL,
@@ -194,6 +201,7 @@ export default function Page() {
   const [bookingDate, setBookingDate] = useState('')
   const [bookingTime, setBookingTime] = useState('')
   const scrollLockUntilRef = useRef<number>(0)
+  useScrollReveal()
   const [formStatuses, setFormStatuses] = useState<{ [key: string]: 'idle' | 'submitting' | 'success' | 'error' }>({
     membership: 'idle',
     booking: 'idle',
@@ -382,6 +390,7 @@ export default function Page() {
 
           <a className="nav-cta" href="#join" onClick={() => handleNavClick('rates')}>Join Now</a>
         </nav>
+        <ScrollProgressBar />
       </header>
 
       {/* Quick Search Modal */}
@@ -463,12 +472,25 @@ export default function Page() {
 
       {/* Gym Values Ticker */}
       <section className="ticker" aria-label="Gym values">
-        <span>DISCIPLINE</span><b>+</b><span>POWER</span><b>+</b><span>PROGRESS</span><b>+</b><span>COMMUNITY</span>
+        {[0, 1].map((trackIdx) => (
+          <div className="ticker-track" key={trackIdx} aria-hidden={trackIdx > 0 || undefined}>
+            {[0, 1, 2, 3, 4, 5].map((groupIdx) => (
+              <div className="ticker-group" key={`${trackIdx}-${groupIdx}`}>
+                {TICKER_VALUES.map((word) => (
+                  <React.Fragment key={`${trackIdx}-${groupIdx}-${word}`}>
+                    <span>{word}</span>
+                    <b>+</b>
+                  </React.Fragment>
+                ))}
+              </div>
+            ))}
+          </div>
+        ))}
       </section>
 
       {/* About Us Section */}
       <section className="intro-section container" id="about">
-        <div>
+        <div data-reveal="">
           <SectionHeading
             title="Built for the work."
             copy="Presson Fitness Gym is built for people who want to be stronger, healthier, and more disciplined. We provide a clean and motivating space with the right equipment, refreshing drinks, and a supportive community."
@@ -480,17 +502,17 @@ export default function Page() {
           </div>
         </div>
         <div className="principles">
-          <article>
+          <article data-reveal="" style={revealDelay(0, 90)}>
             <span>01</span>
             <h3>Show up</h3>
             <p>Consistency beats intensity. We help you make training part of your daily routine and life.</p>
           </article>
-          <article>
+          <article data-reveal="" style={revealDelay(1, 90)}>
             <span>02</span>
             <h3>Push further</h3>
             <p>Progress starts where comfort ends. Find your breakthrough and your next level with us.</p>
           </article>
-          <article>
+          <article data-reveal="" style={revealDelay(2, 90)}>
             <span>03</span>
             <h3>Stay ready</h3>
             <p>Train, fuel, recover, repeat. Everything you need under one roof to perform at your peak.</p>
@@ -501,26 +523,28 @@ export default function Page() {
       {/* Fuel & Refreshments (Original Dark Band) */}
       <section className="dark-band" id="products">
         <div className="container split-section">
-          <SectionHeading
-            title="Fuel your session."
-            copy="Stay sharp between sets with our hand-picked on-site range of pre-workout energy, electrolytes, and cold brew."
-          />
+          <div data-reveal="">
+            <SectionHeading
+              title="Fuel your session."
+              copy="Stay sharp between sets with our hand-picked on-site range of pre-workout energy, electrolytes, and cold brew."
+            />
+          </div>
           <div className="product-grid">
-            <div className="product-card">
+            <div className="product-card" data-reveal="" style={revealDelay(0, 90)}>
               <span className="product-icon">
                 <Zap size={34} strokeWidth={1.75} aria-hidden="true" />
               </span>
               <h3>Energy Drinks</h3>
               <p>Pre-workouts and clean caffeine to ignite your heavy lifts.</p>
             </div>
-            <div className="product-card">
+            <div className="product-card" data-reveal="" style={revealDelay(1, 90)}>
               <span className="product-icon">
                 <Droplets size={34} strokeWidth={1.75} aria-hidden="true" />
               </span>
               <h3>Hydration</h3>
               <p>Ice-cold electrolyte water & hydration blends to keep cramps away.</p>
             </div>
-            <div className="product-card">
+            <div className="product-card" data-reveal="" style={revealDelay(2, 90)}>
               <span className="product-icon">
                 <Coffee size={34} strokeWidth={1.75} aria-hidden="true" />
               </span>
@@ -533,13 +557,15 @@ export default function Page() {
 
       {/* Rates & Membership Pricing Section */}
       <section className="rates-section container" id="rates">
-        <SectionHeading
-          title="Simple, Transparent Pricing."
-          copy="No hidden maintenance fees. No locked contracts. Pick the plan that fits your training schedule and goals."
-        />
+        <div data-reveal="">
+          <SectionHeading
+            title="Simple, Transparent Pricing."
+            copy="No hidden maintenance fees. No locked contracts. Pick the plan that fits your training schedule and goals."
+          />
+        </div>
         <div className="pricing-grid">
           {/* Card 1: Daily Session */}
-          <div className="pricing-card">
+          <div className="pricing-card" data-reveal="" style={revealDelay(0, 80)}>
             <span className="tier-badge">Day Pass / Walk-In</span>
             <h3>Daily Session</h3>
             <div className="price-tag">
@@ -564,7 +590,7 @@ export default function Page() {
           </div>
 
           {/* Card 2: Monthly Session (Featured) */}
-          <div className="pricing-card featured-pricing">
+          <div className="pricing-card featured-pricing" data-reveal="" style={revealDelay(1, 80)}>
             <span className="tier-badge highlight-badge">★ Most Popular / Best Value</span>
             <h3>Monthly Session</h3>
             <div className="price-tag">
@@ -591,7 +617,7 @@ export default function Page() {
           </div>
 
           {/* Card 3: Quarterly (3 Months) */}
-          <div className="pricing-card">
+          <div className="pricing-card" data-reveal="" style={revealDelay(2, 80)}>
             <span className="tier-badge">3-Month Commitment</span>
             <h3>Quarterly</h3>
             <div className="price-tag">
@@ -618,7 +644,7 @@ export default function Page() {
           </div>
 
           {/* Card 4: Annually (12 Months) */}
-          <div className="pricing-card">
+          <div className="pricing-card" data-reveal="" style={revealDelay(3, 80)}>
             <span className="tier-badge">VIP Dedication</span>
             <h3>Annually</h3>
             <div className="price-tag">
@@ -649,7 +675,7 @@ export default function Page() {
 
       {/* 04 — Start Your Membership / Inquiries (Form A + Direct Coach CTA) */}
       <section className="container form-section" id="join">
-        <div className="form-intro">
+        <div className="form-intro" data-reveal="">
           <SectionHeading
             title="Start Your Membership."
             copy={`Fill out the quick form below. Inquire about daily walk-ins, monthly memberships, student discounts, or personal training packages. Submissions go straight to ${FORM_RECIPIENT_EMAIL} and our coaches will confirm your slot.`}
@@ -672,7 +698,7 @@ export default function Page() {
         </div>
 
         {/* Form A */}
-        <form className="styled-form" action={CONTACT_API_ENDPOINT} method="POST" noValidate onSubmit={(e) => handleFormSubmit(e, 'membership')}>
+        <form className="styled-form" action={CONTACT_API_ENDPOINT} method="POST" noValidate onSubmit={(e) => handleFormSubmit(e, 'membership')} data-reveal="" style={revealDelay(1, 100)}>
           <input type="hidden" name="form_type" value="membership" />
           <Field label="Full Name *" name="name" placeholder="Juan dela Cruz" />
           <PhoneInputField
@@ -731,28 +757,28 @@ export default function Page() {
       {/* 04 — Facility & Gear (Information Hub) */}
       <section className="facility-section" id="facility">
         <div className="container">
-          <div className="section-center-heading">
+          <div className="section-center-heading" data-reveal="">
             <h2>The Equipment We Have Built For You</h2>
             <p>Everything you need for strength, hypertrophy, conditioning, and recovery. No queueing for benches.</p>
           </div>
 
           <div className="facility-grid">
-            <div className="facility-card">
+            <div className="facility-card" data-reveal="" style={revealDelay(0, 80)}>
               <span className="facility-num">01</span>
               <h3>Heavy Free Weights</h3>
               <p>Commercial dumbbells spanning from 2.5kg all the way up to 50kg, multiple adjustable incline benches, and Olympic EZ bars.</p>
             </div>
-            <div className="facility-card">
+            <div className="facility-card" data-reveal="" style={revealDelay(1, 80)}>
               <span className="facility-num">02</span>
               <h3>Power Racks & Platforms</h3>
               <p>Heavy-gauge steel power racks, competition Olympic barbells, calibrated bumper plates, chalk stations, and deadlift platforms.</p>
             </div>
-            <div className="facility-card">
+            <div className="facility-card" data-reveal="" style={revealDelay(2, 80)}>
               <span className="facility-num">03</span>
               <h3>Cables & Isolation</h3>
               <p>Dual adjustable pulley systems, lat pulldowns, seated cable rows, leg press, hack squat, and plate-loaded hammer strength machines.</p>
             </div>
-            <div className="facility-card">
+            <div className="facility-card" data-reveal="" style={revealDelay(3, 80)}>
               <span className="facility-num">04</span>
               <h3>Conditioning & Recovery</h3>
               <p>Concept2 rowers, SkiErgs, assault air bikes, turf sled track, private hot showers, and secure electronic lockers.</p>
@@ -764,7 +790,7 @@ export default function Page() {
       {/* 06 — Services & Coaching (Form B + Direct Contact) */}
       <section className="service-section" id="services">
         <div className="container booking-layout">
-          <div>
+          <div data-reveal="">
             <SectionHeading
               title="Book Your Next Session."
               copy="Whether you want hands-on personal coaching to perfect your squat and deadlift, or want to join our high-energy group strength team."
@@ -786,7 +812,7 @@ export default function Page() {
           </div>
 
           {/* Form B */}
-          <form className="styled-form dark-form" action={CONTACT_API_ENDPOINT} method="POST" noValidate onSubmit={(e) => handleFormSubmit(e, 'booking')}>
+          <form className="styled-form dark-form" action={CONTACT_API_ENDPOINT} method="POST" noValidate onSubmit={(e) => handleFormSubmit(e, 'booking')} data-reveal="" style={revealDelay(1, 100)}>
             <input type="hidden" name="form_type" value="booking" />
             <h3 className="form-title">Reserve a Coaching Slot</h3>
             <Field label="Full Name *" name="name" placeholder="Juan dela Cruz" />
@@ -852,7 +878,7 @@ export default function Page() {
 
       {/* 07 — Gallery / Portfolio (6-tile Grid matching wireframe) */}
       <section className="gallery-section container" id="gallery">
-        <div className="gallery-title">
+        <div className="gallery-title" data-reveal="">
           <SectionHeading
             title="Come as you are. Leave stronger."
             copy="Take a look inside our Quezon City facility, the equipment racks, and the athlete community."
@@ -866,6 +892,8 @@ export default function Page() {
             <div
               key={idx}
               className={`gallery-tile ${item.className}`}
+              data-reveal=""
+              style={revealDelay(idx, 70)}
               tabIndex={0}
               role="button"
               aria-label={`View ${item.title}`}
@@ -941,41 +969,41 @@ export default function Page() {
       {/* 08 — Frequently Asked Questions */}
       <section className="faq-section" id="faq">
         <div className="container faq-container">
-          <div className="section-center-heading">
+          <div className="section-center-heading" data-reveal="">
             <h2>Frequently Asked Questions</h2>
             <p>Everything you need to know before stepping foot inside Presson Fitness Gym.</p>
           </div>
 
           <div className="faq-list">
-            <details className="faq-item" open>
+            <details className="faq-item" open data-reveal="" style={revealDelay(0, 60)}>
               <summary>Are beginners welcome at Presson Fitness Gym?</summary>
               <div className="faq-answer">
                 <p>Yes, absolutely! While our gym has serious equipment for powerlifters and strength athletes, over 50% of our members started as complete beginners. Our on-duty coaches are always on the floor to teach proper form, spot your sets, and keep you safe.</p>
               </div>
             </details>
 
-            <details className="faq-item">
+            <details className="faq-item" data-reveal="" style={revealDelay(1, 60)}>
               <summary>Do I need to book in advance before working out?</summary>
               <div className="faq-answer">
                 <p>For open gym access and general workouts, no reservation is needed — you can walk in anytime during our operating hours (8:00 AM – 10:00 PM). For 1-on-1 personal training assessments, please reserve your preferred time via Form B above or by messaging our coach.</p>
               </div>
             </details>
 
-            <details className="faq-item">
+            <details className="faq-item" data-reveal="" style={revealDelay(2, 60)}>
               <summary>What should I bring on my first visit?</summary>
               <div className="faq-answer">
                 <p>Just bring clean training shoes (flat soles or cross-trainers recommended), comfortable workout clothes, and a valid photo ID. We provide free drinking water, clean showers, and secure lockers.</p>
               </div>
             </details>
 
-            <details className="faq-item">
+            <details className="faq-item" data-reveal="" style={revealDelay(3, 60)}>
               <summary>Is there parking available on-site?</summary>
               <div className="faq-answer">
                 <p>Yes! The gym is located right beside the sports court / parking area, which is where we recommend all members and visitors park. There is convenient space for both motorcycles and cars while you train.</p>
               </div>
             </details>
 
-            <details className="faq-item">
+            <details className="faq-item" data-reveal="" style={revealDelay(4, 60)}>
               <summary>What payment methods do you accept?</summary>
               <div className="faq-answer">
                 <p>We accept <strong>Cash</strong> and <strong>Online Payments</strong> (GCash, Maya, and Bank Transfer / QR Ph) at the front desk. Please note that we <strong>do not accept credit or debit cards</strong> at this time.</p>
@@ -989,12 +1017,14 @@ export default function Page() {
       <section className="contact-section" id="contact">
         <div className="container contact-layout">
           <div>
-            <SectionHeading
-              title="Let’s Get To Work."
-              copy="Questions about partnerships, group bookings, or rates? Send us an inquiry or visit us directly."
-            />
+            <div data-reveal="">
+              <SectionHeading
+                title="Let’s Get To Work."
+                copy="Questions about partnerships, group bookings, or rates? Send us an inquiry or visit us directly."
+              />
+            </div>
             <div className="contact-info-block">
-              <div className="info-item">
+              <div className="info-item" data-reveal="" style={revealDelay(0, 70)}>
                 <span className="info-icon">
                   <MapPin size={20} strokeWidth={1.85} aria-hidden="true" />
                 </span>
@@ -1004,7 +1034,7 @@ export default function Page() {
                   <small className="info-hint">(Right beside the Sports Court &middot; Court Parking for Cars &amp; Motorcycles)</small>
                 </div>
               </div>
-              <div className="info-item">
+              <div className="info-item" data-reveal="" style={revealDelay(1, 70)}>
                 <span className="info-icon">
                   <Wallet size={20} strokeWidth={1.85} aria-hidden="true" />
                 </span>
@@ -1014,7 +1044,7 @@ export default function Page() {
                   <small className="info-hint">(Card payments not accepted)</small>
                 </div>
               </div>
-              <div className="info-item">
+              <div className="info-item" data-reveal="" style={revealDelay(2, 70)}>
                 <span className="info-icon">
                   <Mail size={20} strokeWidth={1.85} aria-hidden="true" />
                 </span>
@@ -1023,7 +1053,7 @@ export default function Page() {
                   <p><a href="mailto:carlvine0926@gmail.com">carlvine0926@gmail.com</a></p>
                 </div>
               </div>
-              <div className="info-item">
+              <div className="info-item" data-reveal="" style={revealDelay(3, 70)}>
                 <span className="info-icon">
                   <Phone size={20} strokeWidth={1.85} aria-hidden="true" />
                 </span>
@@ -1032,7 +1062,7 @@ export default function Page() {
                   <p><a href="tel:+639270660386">0927 066 0386</a></p>
                 </div>
               </div>
-              <div className="info-item">
+              <div className="info-item" data-reveal="" style={revealDelay(4, 70)}>
                 <span className="info-icon">
                   <Clock size={20} strokeWidth={1.85} aria-hidden="true" />
                 </span>
@@ -1045,7 +1075,7 @@ export default function Page() {
           </div>
 
           {/* Form C */}
-          <form className="styled-form" action={CONTACT_API_ENDPOINT} method="POST" noValidate onSubmit={(e) => handleFormSubmit(e, 'contact')}>
+          <form className="styled-form" action={CONTACT_API_ENDPOINT} method="POST" noValidate onSubmit={(e) => handleFormSubmit(e, 'contact')} data-reveal="" style={revealDelay(1, 120)}>
             <input type="hidden" name="form_type" value="contact" />
             <h3 className="form-title">Send Direct Inquiry</h3>
             <Field label="Full Name *" name="name" placeholder="Juan dela Cruz" />

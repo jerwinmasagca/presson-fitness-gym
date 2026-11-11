@@ -65,6 +65,19 @@ a {
   transition: all 0.25s ease;
 }
 
+.scroll-progress-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: linear-gradient(90deg, #b38e46 0%, var(--gold) 60%, #e7cf98 100%);
+  transform: scaleX(0);
+  transform-origin: left center;
+  pointer-events: none;
+  will-change: transform;
+}
+
 .brand {
   display: flex;
   align-items: center;
@@ -331,6 +344,8 @@ h1, h2, h3, h4 {
 
 /* Buttons */
 .button {
+  position: relative;
+  overflow: hidden;
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
@@ -342,13 +357,18 @@ h1, h2, h3, h4 {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+}
+
+.button:hover:not(:disabled) {
+  transform: translateY(-2px);
 }
 
 .button span {
   font-family: Montserrat, sans-serif;
   font-size: 14px;
-  transition: transform 0.2s ease;
+  display: inline-block;
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .button:hover span {
@@ -361,9 +381,27 @@ h1, h2, h3, h4 {
   border-color: var(--gold);
 }
 
+.button-gold::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -130%;
+  width: 65%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.34), transparent);
+  transform: skewX(-20deg);
+  transition: left 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+
+.button-gold:hover::after {
+  left: 140%;
+}
+
 .button-gold:hover {
   background: var(--gold-hover);
   color: #000;
+  box-shadow: 0 10px 24px rgba(201, 169, 106, 0.28);
 }
 
 .button-dark {
@@ -417,6 +455,7 @@ h1, h2, h3, h4 {
 }
 
 .hero-athlete-art {
+  --hero-art-opacity: 1;
   position: absolute;
   top: 8px;
   right: 0;
@@ -429,6 +468,7 @@ h1, h2, h3, h4 {
   pointer-events: none;
   -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.55) 28%, #000 54%);
   mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.55) 28%, #000 54%);
+  animation: heroAthleteSettle 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
 }
 
 .hero-banner-inner {
@@ -444,6 +484,7 @@ h1, h2, h3, h4 {
   font-size: clamp(64px, 7.6vw, 114px);
   line-height: 0.9;
   color: var(--cream);
+  animation: heroSlideUp 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.04s both;
 }
 
 .hero-banner h1 em {
@@ -457,12 +498,14 @@ h1, h2, h3, h4 {
   font-size: 16px;
   line-height: 1.65;
   margin: 22px 0 32px;
+  animation: heroSlideUp 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.16s both;
 }
 
 .hero-actions {
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
+  animation: heroSlideUp 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.28s both;
 }
 
 .hero-join-btn {
@@ -472,18 +515,39 @@ h1, h2, h3, h4 {
   font-size: 17px;
 }
 
-/* Ticker Bar */
+/* Ticker Bar (Endless Seamless Marquee) */
 .ticker {
   display: flex;
-  gap: 28px;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
+  overflow: hidden;
+  padding: 18px 0;
   background: #e3ded0;
   border-bottom: 1px solid var(--line);
   font: 20px 'Bebas Neue', sans-serif;
   letter-spacing: 0.14em;
-  flex-wrap: wrap;
+  user-select: none;
+}
+
+.ticker-track {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  min-width: 100%;
+  justify-content: space-around;
+  will-change: transform;
+  animation: tickerMarquee 78s linear infinite;
+}
+
+.ticker:hover .ticker-track {
+  animation-play-state: paused;
+}
+
+.ticker-group {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding-right: 28px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .ticker b {
@@ -1715,6 +1779,7 @@ h1, h2, h3, h4 {
   }
 
   .hero-athlete-art {
+    --hero-art-opacity: 0.42;
     top: 0;
     height: 100%;
     opacity: 0.42;
@@ -2348,4 +2413,183 @@ div:where(.swal2-container) {
 
 div:where(.swal2-container) .swal2-loader {
   border-color: var(--gold) transparent var(--gold) transparent !important;
+}
+
+/* Clean Editorial Motion System */
+@keyframes heroSlideUp {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 20px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes heroAthleteSettle {
+  from {
+    opacity: 0;
+    transform: translate3d(22px, 0, 0) scale(1.03);
+  }
+  to {
+    opacity: var(--hero-art-opacity, 1);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes tickerMarquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-100%, 0, 0);
+  }
+}
+
+@keyframes modalBackdropFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalPopIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes menuUnfold {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes faqReveal {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Progressive scroll-reveal using standalone translate so card hover transforms stay conflict-free */
+[data-reveal='pending'] {
+  opacity: 0;
+  translate: 0 22px;
+}
+
+[data-reveal='visible'] {
+  opacity: 1;
+  translate: 0 0;
+  transition:
+    opacity 0.62s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
+    translate 0.62s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms);
+}
+
+.product-icon {
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.product-card:hover .product-icon {
+  transform: translateY(-2px) scale(1.08);
+}
+
+.gallery-cta-link span {
+  display: inline-block;
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.gallery-cta-link:hover span {
+  transform: translateX(4px);
+}
+
+.page-hero .eyebrow {
+  animation: heroSlideUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.04s both;
+}
+
+.page-hero h1 {
+  animation: heroSlideUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
+}
+
+.page-hero .hero-intro {
+  animation: heroSlideUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.22s both;
+}
+
+.faq-item[open] .faq-answer {
+  animation: faqReveal 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.custom-select-menu {
+  animation: menuUnfold 0.16s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.picker-modal-backdrop,
+.search-modal-backdrop {
+  animation: modalBackdropFade 0.18s ease-out;
+}
+
+.picker-modal,
+.search-modal,
+.gallery-lightbox.active .lightbox-content {
+  animation: modalPopIn 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .hero-banner h1,
+  .hero-banner .hero-intro,
+  .hero-actions,
+  .hero-athlete-art,
+  .page-hero .eyebrow,
+  .page-hero h1,
+  .page-hero .hero-intro,
+  .ticker-track,
+  .faq-item[open] .faq-answer,
+  .custom-select-menu,
+  .picker-modal-backdrop,
+  .picker-modal,
+  .search-modal-backdrop,
+  .search-modal,
+  .gallery-lightbox.active .lightbox-content {
+    animation: none !important;
+  }
+
+  .ticker-track {
+    animation: none !important;
+  }
+
+  .ticker-track[aria-hidden='true'] {
+    display: none;
+  }
+
+  [data-reveal='pending'],
+  [data-reveal='visible'] {
+    opacity: 1 !important;
+    translate: 0 0 !important;
+    transition: none !important;
+  }
+
+  .button-gold::after {
+    display: none;
+  }
 }
