@@ -2,10 +2,60 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import {
+  Clock,
+  Coffee,
+  Droplets,
+  Mail,
+  MapPin,
+  Phone,
+  Wallet,
+  Zap,
+} from 'lucide-react'
+import {
+  DatePickerField,
+  PhoneInputField,
+  SelectField,
+  TimePickerField,
+  type SelectOption,
+} from '@/components/form-controls'
+import {
   CONTACT_API_ENDPOINT,
   FORM_RECIPIENT_EMAIL,
-  submitContactForm,
 } from '@/lib/formsubmit'
+import { submitFormWithSweetAlert } from '@/lib/swal'
+
+const membershipPlanOptions: SelectOption[] = [
+  {
+    value: 'Daily Session (Regular: ₱65 / Student & Senior: ₱60)',
+    label: 'Daily Session (Regular: ₱65 / Student & Senior: ₱60)',
+  },
+  {
+    value: 'Monthly Session (Regular: ₱750 / Student & Senior: ₱700)',
+    label: 'Monthly Session (Regular: ₱750 / Student & Senior: ₱700)',
+  },
+  {
+    value: 'Quarterly 3-Months (Regular: ₱2,100 / Student: ₱1,900)',
+    label: 'Quarterly 3-Months (Regular: ₱2,100 / Student: ₱1,900)',
+  },
+  {
+    value: 'Annually 12-Months (Regular: ₱7,950 / Student & Senior: ₱7,100)',
+    label: 'Annually 12-Months (Regular: ₱7,950 / Student & Senior: ₱7,100)',
+  },
+  {
+    value: '1-on-1 Personal Training Package',
+    label: '1-on-1 Personal Training Package',
+  },
+  {
+    value: 'General Inquiry / Other',
+    label: 'General Inquiry / Other',
+  },
+]
+
+const bookingServiceOptions: SelectOption[] = [
+  { value: '1-on-1 Personal Training', label: '1-on-1 Personal Training Assessment' },
+  { value: 'Group Strength', label: 'Group Strength Session' },
+  { value: 'Open Gym Trial', label: 'Open Gym Day Trial' },
+]
 
 const galleryItems = [
   {
@@ -137,6 +187,12 @@ export default function Page() {
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedPlan, setSelectedPlan] = useState('')
+  const [membershipPhone, setMembershipPhone] = useState('')
+  const [membershipStartDate, setMembershipStartDate] = useState('')
+  const [bookingService, setBookingService] = useState('1-on-1 Personal Training')
+  const [bookingPhone, setBookingPhone] = useState('')
+  const [bookingDate, setBookingDate] = useState('')
+  const [bookingTime, setBookingTime] = useState('')
   const scrollLockUntilRef = useRef<number>(0)
   const [formStatuses, setFormStatuses] = useState<{ [key: string]: 'idle' | 'submitting' | 'success' | 'error' }>({
     membership: 'idle',
@@ -235,7 +291,7 @@ export default function Page() {
     setFormStatuses(prev => ({ ...prev, [formKey]: 'submitting' }))
     setFormMessages(prev => ({ ...prev, [formKey]: '' }))
     const form = e.currentTarget
-    const result = await submitContactForm(form)
+    const result = await submitFormWithSweetAlert(form, formKey)
 
     if (result.ok) {
       setFormStatuses(prev => ({ ...prev, [formKey]: 'success' }))
@@ -243,6 +299,14 @@ export default function Page() {
       form.reset()
       if (formKey === 'membership') {
         setSelectedPlan('')
+        setMembershipPhone('')
+        setMembershipStartDate('')
+      }
+      if (formKey === 'booking') {
+        setBookingService('1-on-1 Personal Training')
+        setBookingPhone('')
+        setBookingDate('')
+        setBookingTime('')
       }
       return
     }
@@ -443,17 +507,23 @@ export default function Page() {
           />
           <div className="product-grid">
             <div className="product-card">
-              <span className="product-icon">⚡</span>
+              <span className="product-icon">
+                <Zap size={34} strokeWidth={1.75} aria-hidden="true" />
+              </span>
               <h3>Energy Drinks</h3>
               <p>Pre-workouts and clean caffeine to ignite your heavy lifts.</p>
             </div>
             <div className="product-card">
-              <span className="product-icon">💧</span>
+              <span className="product-icon">
+                <Droplets size={34} strokeWidth={1.75} aria-hidden="true" />
+              </span>
               <h3>Hydration</h3>
               <p>Ice-cold electrolyte water & hydration blends to keep cramps away.</p>
             </div>
             <div className="product-card">
-              <span className="product-icon">☕</span>
+              <span className="product-icon">
+                <Coffee size={34} strokeWidth={1.75} aria-hidden="true" />
+              </span>
               <h3>Fresh Coffee</h3>
               <p>Locally sourced robust roast to fuel your morning training grind.</p>
             </div>
@@ -590,47 +660,52 @@ export default function Page() {
             <p>Have questions about injuries, workout programs, or rates? Talk directly with our head coach or gym owner:</p>
             <div className="coach-contact-actions">
               <a href="tel:+639270660386" className="coach-btn call-btn">
-                📞 Call (0927 066 0386)
+                <Phone size={15} strokeWidth={2.1} aria-hidden="true" />
+                <span>Call (0927 066 0386)</span>
               </a>
               <a href="mailto:carlvine0926@gmail.com" className="coach-btn email-btn">
-                ✉️ Email Coach
+                <Mail size={15} strokeWidth={2.1} aria-hidden="true" />
+                <span>Email Coach</span>
               </a>
             </div>
           </div>
         </div>
 
         {/* Form A */}
-        <form className="styled-form" action={CONTACT_API_ENDPOINT} method="POST" onSubmit={(e) => handleFormSubmit(e, 'membership')}>
+        <form className="styled-form" action={CONTACT_API_ENDPOINT} method="POST" noValidate onSubmit={(e) => handleFormSubmit(e, 'membership')}>
           <input type="hidden" name="form_type" value="membership" />
           <Field label="Full Name *" name="name" placeholder="Juan dela Cruz" />
-          <Field label="Phone / Mobile Number *" name="phone" type="tel" placeholder="0927 066 0386" />
-          <label className="field">
-            <span>Interested Membership Plan *</span>
-            <select
-              name="membership"
-              required
-              value={selectedPlan}
-              onChange={(e) => setSelectedPlan(e.target.value)}
-            >
-              <option value="" disabled>Choose a membership option</option>
-              <option value="Daily Session (Regular: ₱65 / Student & Senior: ₱60)">Daily Session (Regular: ₱65 / Student & Senior: ₱60)</option>
-              <option value="Monthly Session (Regular: ₱750 / Student & Senior: ₱700)">Monthly Session (Regular: ₱750 / Student & Senior: ₱700)</option>
-              <option value="Quarterly 3-Months (Regular: ₱2,100 / Student: ₱1,900)">Quarterly 3-Months (Regular: ₱2,100 / Student: ₱1,900)</option>
-              <option value="Annually 12-Months (Regular: ₱7,950 / Student & Senior: ₱7,100)">Annually 12-Months (Regular: ₱7,950 / Student & Senior: ₱7,100)</option>
-              <option value="1-on-1 Personal Training Package">1-on-1 Personal Training Package</option>
-              <option value="General Inquiry / Other">General Inquiry / Other</option>
-            </select>
-          </label>
-          <label className="field">
-            <span>Target Start Date</span>
-            <input type="date" name="start_date" />
-          </label>
+          <PhoneInputField
+            label="Phone / Mobile Number *"
+            name="phone"
+            value={membershipPhone}
+            onChange={setMembershipPhone}
+            placeholder="09270660386"
+          />
+          <SelectField
+            label="Interested Membership Plan *"
+            name="membership"
+            value={selectedPlan}
+            onChange={setSelectedPlan}
+            options={membershipPlanOptions}
+            placeholder="Choose a membership option"
+            required
+            variant="light"
+          />
+          <DatePickerField
+            label="Target Start Date"
+            name="start_date"
+            value={membershipStartDate}
+            onChange={setMembershipStartDate}
+            placeholder="Click to choose date"
+            variant="light"
+          />
           <button
             className="button button-dark"
             type="submit"
             disabled={formStatuses.membership === 'submitting'}
           >
-            {formStatuses.membership === 'submitting' ? 'Sending Details... ⏳' : 'Inquire Now & Submit ↗'}
+            {formStatuses.membership === 'submitting' ? 'Sending Details...' : 'Inquire Now & Submit ↗'}
           </button>
 
           {formStatuses.membership === 'success' && (
@@ -704,35 +779,60 @@ export default function Page() {
               <p><strong>Want to talk to the trainer before booking?</strong></p>
               <p>Drop a quick question to Coach Jerwin directly:</p>
               <a href="tel:+639270660386" className="coach-call-link">
-                📞 Call / Text Coach: 0927 066 0386 &rarr;
+                <Phone size={15} strokeWidth={2.1} aria-hidden="true" />
+                <span>Call / Text Coach: 0927 066 0386 &rarr;</span>
               </a>
             </div>
           </div>
 
           {/* Form B */}
-          <form className="styled-form dark-form" action={CONTACT_API_ENDPOINT} method="POST" onSubmit={(e) => handleFormSubmit(e, 'booking')}>
+          <form className="styled-form dark-form" action={CONTACT_API_ENDPOINT} method="POST" noValidate onSubmit={(e) => handleFormSubmit(e, 'booking')}>
             <input type="hidden" name="form_type" value="booking" />
             <h3 className="form-title">Reserve a Coaching Slot</h3>
             <Field label="Full Name *" name="name" placeholder="Juan dela Cruz" />
-            <Field label="Phone Number *" name="phone" type="tel" placeholder="0927 066 0386" />
-            <label className="field">
-              <span>Service Required *</span>
-              <select name="service" required defaultValue="1-on-1 Personal Training">
-                <option value="1-on-1 Personal Training">1-on-1 Personal Training Assessment</option>
-                <option value="Group Strength">Group Strength Session</option>
-                <option value="Open Gym Trial">Open Gym Day Trial</option>
-              </select>
-            </label>
+            <PhoneInputField
+              label="Phone Number *"
+              name="phone"
+              value={bookingPhone}
+              onChange={setBookingPhone}
+              placeholder="09270660386"
+            />
+            <SelectField
+              label="Service Required *"
+              name="service"
+              value={bookingService}
+              onChange={setBookingService}
+              options={bookingServiceOptions}
+              placeholder="Choose a service"
+              required
+              variant="dark"
+            />
             <div className="two-fields">
-              <Field label="Preferred Date *" name="date" type="date" />
-              <Field label="Preferred Time *" name="time" type="time" />
+              <DatePickerField
+                label="Preferred Date *"
+                name="date"
+                value={bookingDate}
+                onChange={setBookingDate}
+                placeholder="Choose a date"
+                required
+                variant="dark"
+              />
+              <TimePickerField
+                label="Preferred Time *"
+                name="time"
+                value={bookingTime}
+                onChange={setBookingTime}
+                placeholder="Choose time"
+                required
+                variant="dark"
+              />
             </div>
             <button
               className="button button-gold"
               type="submit"
               disabled={formStatuses.booking === 'submitting'}
             >
-              {formStatuses.booking === 'submitting' ? 'Sending Slot Request... ⏳' : 'Book Online & Confirm ↗'}
+              {formStatuses.booking === 'submitting' ? 'Sending Slot Request...' : 'Book Online & Confirm ↗'}
             </button>
 
             {formStatuses.booking === 'success' && (
@@ -895,7 +995,9 @@ export default function Page() {
             />
             <div className="contact-info-block">
               <div className="info-item">
-                <span className="info-icon">📍</span>
+                <span className="info-icon">
+                  <MapPin size={20} strokeWidth={1.85} aria-hidden="true" />
+                </span>
                 <div>
                   <strong>Location & Address</strong>
                   <p>123 Fitness Avenue, Quezon City, Philippines</p>
@@ -903,7 +1005,9 @@ export default function Page() {
                 </div>
               </div>
               <div className="info-item">
-                <span className="info-icon">💵</span>
+                <span className="info-icon">
+                  <Wallet size={20} strokeWidth={1.85} aria-hidden="true" />
+                </span>
                 <div>
                   <strong>Accepted Payment Methods</strong>
                   <p>Cash &middot; GCash &middot; Maya &middot; Bank Transfer</p>
@@ -911,21 +1015,27 @@ export default function Page() {
                 </div>
               </div>
               <div className="info-item">
-                <span className="info-icon">✉️</span>
+                <span className="info-icon">
+                  <Mail size={20} strokeWidth={1.85} aria-hidden="true" />
+                </span>
                 <div>
                   <strong>Email Address</strong>
                   <p><a href="mailto:carlvine0926@gmail.com">carlvine0926@gmail.com</a></p>
                 </div>
               </div>
               <div className="info-item">
-                <span className="info-icon">📞</span>
+                <span className="info-icon">
+                  <Phone size={20} strokeWidth={1.85} aria-hidden="true" />
+                </span>
                 <div>
                   <strong>Coach Phone & Mobile</strong>
                   <p><a href="tel:+639270660386">0927 066 0386</a></p>
                 </div>
               </div>
               <div className="info-item">
-                <span className="info-icon">⏰</span>
+                <span className="info-icon">
+                  <Clock size={20} strokeWidth={1.85} aria-hidden="true" />
+                </span>
                 <div>
                   <strong>Operating Schedule</strong>
                   <p>Monday — Sunday · 8:00 AM — 10:00 PM</p>
@@ -935,7 +1045,7 @@ export default function Page() {
           </div>
 
           {/* Form C */}
-          <form className="styled-form" action={CONTACT_API_ENDPOINT} method="POST" onSubmit={(e) => handleFormSubmit(e, 'contact')}>
+          <form className="styled-form" action={CONTACT_API_ENDPOINT} method="POST" noValidate onSubmit={(e) => handleFormSubmit(e, 'contact')}>
             <input type="hidden" name="form_type" value="contact" />
             <h3 className="form-title">Send Direct Inquiry</h3>
             <Field label="Full Name *" name="name" placeholder="Juan dela Cruz" />
@@ -949,7 +1059,7 @@ export default function Page() {
               type="submit"
               disabled={formStatuses.contact === 'submitting'}
             >
-              {formStatuses.contact === 'submitting' ? 'Sending Message... ⏳' : 'Send Message ↗'}
+              {formStatuses.contact === 'submitting' ? 'Sending Message...' : 'Send Message ↗'}
             </button>
 
             {formStatuses.contact === 'success' && (
@@ -982,10 +1092,12 @@ export default function Page() {
       {/* Sticky Mobile Bottom CTA Bar */}
       <div className="mobile-bottom-bar">
         <a href="tel:+639270660386" className="mobile-bar-btn call-btn-mobile">
-          📞 Call Coach
+          <Phone size={15} strokeWidth={2.1} aria-hidden="true" />
+          <span>Call Coach</span>
         </a>
         <a href="#services" className="mobile-bar-btn book-btn">
-          ⚡ Book Session
+          <Zap size={15} strokeWidth={2.1} aria-hidden="true" />
+          <span>Book Session</span>
         </a>
       </div>
     </main>

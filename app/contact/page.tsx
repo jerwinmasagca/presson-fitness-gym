@@ -6,8 +6,8 @@ import {
   CONTACT_API_ENDPOINT,
   FORM_RECIPIENT_EMAIL,
   GYM_CONTACT_EMAIL,
-  submitContactForm,
 } from '@/lib/formsubmit'
+import { submitFormWithSweetAlert } from '@/lib/swal'
 
 export default function ContactPage() {
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
@@ -18,7 +18,7 @@ export default function ContactPage() {
     setStatus('submitting')
     setMessage('')
     const form = e.currentTarget
-    const result = await submitContactForm(form)
+    const result = await submitFormWithSweetAlert(form, 'contact-page')
 
     if (result.ok) {
       setStatus('success')
@@ -64,7 +64,7 @@ export default function ContactPage() {
           <small style={{ color: '#aaa' }}>*Cards not accepted</small>
         </div>
 
-        <form className="styled-form" action={CONTACT_API_ENDPOINT} method="POST" onSubmit={handleSubmit}>
+        <form className="styled-form" action={CONTACT_API_ENDPOINT} method="POST" noValidate onSubmit={handleSubmit}>
           <input type="hidden" name="form_type" value="contact-page" />
           <Field label="Full name" name="name" />
           <Field label="Email address" name="email" type="email" />
@@ -73,7 +73,7 @@ export default function ContactPage() {
             <textarea name="message" rows={6} required />
           </label>
           <button className="button button-gold" type="submit" disabled={status === 'submitting'}>
-            {status === 'submitting' ? 'Sending Inquiry... ⏳' : <>Send inquiry <span>→</span></>}
+            {status === 'submitting' ? 'Sending Inquiry...' : <>Send inquiry <span>→</span></>}
           </button>
 
           {status === 'success' && (

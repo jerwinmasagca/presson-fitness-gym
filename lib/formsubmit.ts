@@ -11,6 +11,36 @@ export const GYM_CONTACT_EMAIL = 'carlvine0926@gmail.com'
 
 export const CONTACT_API_ENDPOINT = '/api/contact'
 
+/** Strictly 11-digit Philippine mobile number starting with 09 (e.g., 09270660386). */
+export const PH_MOBILE_PATTERN = /^09\d{9}$/
+
+/**
+ * Normalizes a typed or pasted phone value into digits-only (max 11 digits),
+ * converting pasted +639XXXXXXXXX / 639XXXXXXXXX into local 09XXXXXXXXX format.
+ */
+export function sanitizePhMobileInput(raw: string): string {
+  const trimmed = raw.trim()
+  const digits = trimmed.replace(/\D/g, '')
+  if (/^\+?63\s*9/.test(trimmed) || (digits.length === 12 && digits.startsWith('639'))) {
+    return `0${digits.slice(2)}`.slice(0, 11)
+  }
+  return digits.slice(0, 11)
+}
+
+/**
+ * Validates that a phone number is an 11-digit Philippine mobile number starting with 09.
+ */
+export function validatePhMobile(phone: string): string | null {
+  const cleaned = phone.trim()
+  if (!cleaned) {
+    return 'Please provide your 11-digit mobile number.'
+  }
+  if (!PH_MOBILE_PATTERN.test(cleaned)) {
+    return 'Please enter a valid 11-digit Philippine mobile number starting with 09 (e.g., 09270660386).'
+  }
+  return null
+}
+
 export interface ContactSubmitResult {
   ok: boolean
   message: string

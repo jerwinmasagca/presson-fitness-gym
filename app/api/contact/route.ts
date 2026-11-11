@@ -4,7 +4,10 @@ import {
   type ContactEmailPayload,
   type ContactFormType,
 } from '@/lib/email-template'
-import { FORM_RECIPIENT_EMAIL } from '@/lib/formsubmit'
+import {
+  FORM_RECIPIENT_EMAIL,
+  validatePhMobile,
+} from '@/lib/formsubmit'
 
 const VALID_FORM_TYPES = new Set<ContactFormType>(['membership', 'booking', 'contact', 'contact-page'])
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -44,12 +47,14 @@ function validatePayload(payload: ContactEmailPayload): string | null {
   }
 
   if (payload.formType === 'membership') {
-    if (!payload.phone) return 'Please provide your mobile or phone number.'
+    const phoneError = validatePhMobile(payload.phone || '')
+    if (phoneError) return phoneError
     if (!payload.membership) return 'Please choose a membership plan.'
   }
 
   if (payload.formType === 'booking') {
-    if (!payload.phone) return 'Please provide your phone number so our coach can confirm.'
+    const phoneError = validatePhMobile(payload.phone || '')
+    if (phoneError) return phoneError
     if (!payload.service) return 'Please select the coaching service you need.'
     if (!payload.date || !payload.time) return 'Please choose a preferred date and time.'
   }
@@ -84,7 +89,9 @@ export async function POST(request: Request) {
   const payload: ContactEmailPayload = {
     formType: normalizeFormType(readString(rawFields.form_type)),
     name: readString(rawFields.name),
-    phone: readString(rawFields.phone),
+    phone: readString(rawFields.phone)
+      .replace(/[\s()-]+/g, '')
+      .replace(/^\+?63(?=9\d{9}$)/, '0'),
     email: readString(rawFields.email),
     membership: readString(rawFields.membership),
     startDate: readString(rawFields.start_date),
