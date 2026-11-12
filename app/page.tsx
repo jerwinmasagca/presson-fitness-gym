@@ -19,6 +19,7 @@ import {
   type SelectOption,
 } from '@/components/form-controls'
 import { ScrollProgressBar, useScrollReveal } from '@/components/scroll-effects'
+import { FacebookIcon, FooterFacebookLink } from '@/components/social-icons'
 
 function revealDelay(index: number, stepMs = 80): React.CSSProperties {
   return { '--reveal-delay': `${index * stepMs}ms` } as React.CSSProperties
@@ -28,6 +29,7 @@ const TICKER_VALUES = ['DISCIPLINE', 'POWER', 'PROGRESS', 'COMMUNITY'] as const
 import {
   CONTACT_API_ENDPOINT,
   FORM_RECIPIENT_EMAIL,
+  GYM_FACEBOOK_URL,
 } from '@/lib/formsubmit'
 import { submitFormWithSweetAlert } from '@/lib/swal'
 
@@ -1059,6 +1061,19 @@ export default function Page() {
               </div>
               <div className="info-item" data-reveal="" style={revealDelay(4, 70)}>
                 <span className="info-icon">
+                  <FacebookIcon size={20} strokeWidth={1.85} />
+                </span>
+                <div>
+                  <strong>Facebook Page</strong>
+                  <p>
+                    <a href={GYM_FACEBOOK_URL} target="_blank" rel="noopener noreferrer">
+                      facebook.com/PressOnGym ↗
+                    </a>
+                  </p>
+                </div>
+              </div>
+              <div className="info-item" data-reveal="" style={revealDelay(5, 70)}>
+                <span className="info-icon">
                   <Clock size={20} strokeWidth={1.85} aria-hidden="true" />
                 </span>
                 <div>
@@ -1110,7 +1125,10 @@ export default function Page() {
             <span>PRESSON<span>FITNESS GYM</span></span>
           </a>
           <p>© 2026 Presson Fitness Gym. Train harder. Live stronger.</p>
-          <a className="back-to-top" href="#home">Back to top ↑</a>
+          <div className="footer-actions">
+            <FooterFacebookLink />
+            <a className="back-to-top" href="#home">Back to top ↑</a>
+          </div>
         </div>
       </footer>
 

@@ -9,6 +9,9 @@ export const FORM_RECIPIENT_EMAIL =
 /** Public gym email shown in direct coach contact links. */
 export const GYM_CONTACT_EMAIL = 'carlvine0926@gmail.com'
 
+/** Official Presson Fitness Gym Facebook page URL. */
+export const GYM_FACEBOOK_URL = 'https://www.facebook.com/PressOnGym'
+
 export const CONTACT_API_ENDPOINT = '/api/contact'
 
 /** Strictly 11-digit Philippine mobile number starting with 09 (e.g., 09270660386). */

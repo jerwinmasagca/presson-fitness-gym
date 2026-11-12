@@ -6,6 +6,7 @@ import {
   CONTACT_API_ENDPOINT,
   FORM_RECIPIENT_EMAIL,
   GYM_CONTACT_EMAIL,
+  GYM_FACEBOOK_URL,
 } from '@/lib/formsubmit'
 import { submitFormWithSweetAlert } from '@/lib/swal'
 
@@ -50,6 +51,15 @@ export default function ContactPage() {
           {GYM_CONTACT_EMAIL}
           <br />
           0927 066 0386
+          <br />
+          <a
+            href={GYM_FACEBOOK_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: '#c9a96a', textDecoration: 'underline', textUnderlineOffset: '3px' }}
+          >
+            facebook.com/PressOnGym ↗
+          </a>
           <br />
           <br />
           <strong>Operating Hours:</strong>

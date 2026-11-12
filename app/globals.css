@@ -1658,6 +1658,26 @@ h1, h2, h3, h4 {
   font-size: 24px;
 }
 
+.footer-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.footer-social-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #ffffff;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.footer-social-link:hover {
+  color: var(--gold);
+}
+
 .back-to-top {
   color: var(--gold);
   font-weight: 600;
