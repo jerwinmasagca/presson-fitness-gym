@@ -19,7 +19,7 @@ import {
   type SelectOption,
 } from '@/components/form-controls'
 import { ScrollProgressBar, useScrollReveal } from '@/components/scroll-effects'
-import { FacebookIcon, FooterFacebookLink } from '@/components/social-icons'
+import { FacebookIcon } from '@/components/social-icons'
 
 function revealDelay(index: number, stepMs = 80): React.CSSProperties {
   return { '--reveal-delay': `${index * stepMs}ms` } as React.CSSProperties
@@ -1125,10 +1125,7 @@ export default function Page() {
             <span>PRESSON<span>FITNESS GYM</span></span>
           </a>
           <p>© 2026 Presson Fitness Gym. Train harder. Live stronger.</p>
-          <div className="footer-actions">
-            <FooterFacebookLink />
-            <a className="back-to-top" href="#home">Back to top ↑</a>
-          </div>
+          <a className="back-to-top" href="#home">Back to top ↑</a>
         </div>
       </footer>
 

@@ -4,7 +4,6 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ScrollProgressBar, useScrollReveal } from '@/components/scroll-effects'
-import { FooterFacebookLink } from '@/components/social-icons'
 
 const innerNavLinks = [
   { href: '/', label: 'Home' },
@@ -74,10 +73,7 @@ export function PageShell({ eyebrow, title, copy, children }: { eyebrow: string;
             <span>PRESSON<span>FITNESS GYM</span></span>
           </Link>
           <p>© 2026 Presson Fitness Gym. Train harder. Live stronger.</p>
-          <div className="footer-actions">
-            <FooterFacebookLink />
-            <Link className="back-to-top" href="/">Back home ↑</Link>
-          </div>
+          <Link href="/">Back home ↑</Link>
         </div>
       </footer>
     </main>
