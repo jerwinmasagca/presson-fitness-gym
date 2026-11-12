@@ -71,8 +71,99 @@ function validatePayload(payload: ContactEmailPayload): string | null {
   return null
 }
 
+interface EmailSendParams {
+  senderEmail: string
+  recipientEmail: string
+  replyToEmail?: string
+  replyToName?: string
+  subject: string
+  html: string
+  text: string
+}
+
+async function sendViaBrevo(apiKey: string, params: EmailSendParams): Promise<void> {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), 12000)
+
+  try {
+    const body: Record<string, unknown> = {
+      sender: {
+        name: 'Presson Fitness Gym',
+        email: params.senderEmail,
+      },
+      to: [
+        {
+          email: params.recipientEmail,
+          name: 'Presson Fitness Gym',
+        },
+      ],
+      subject: params.subject,
+      htmlContent: params.html,
+      textContent: params.text,
+    }
+
+    if (params.replyToEmail) {
+      body.replyTo = {
+        email: params.replyToEmail,
+        name: params.replyToName || params.replyToEmail,
+      }
+    }
+
+    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        accept: 'application/json',
+        'api-key': apiKey,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    })
+
+    if (!res.ok) {
+      const errJson = (await res.json().catch(() => null)) as { code?: string; message?: string } | null
+      const detail = errJson?.message || `HTTP ${res.status}`
+      const err = new Error(`Brevo API error (${res.status}): ${detail}`) as Error & {
+        status?: number
+        brevoCode?: string
+      }
+      err.status = res.status
+      err.brevoCode = errJson?.code
+      throw err
+    }
+  } finally {
+    clearTimeout(timeoutId)
+  }
+}
+
+async function sendViaGmailSmtp(
+  gmailUser: string,
+  gmailAppPassword: string,
+  params: EmailSendParams,
+): Promise<void> {
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
+    auth: {
+      user: gmailUser,
+      pass: gmailAppPassword,
+    },
+  })
+
+  await transporter.sendMail({
+    from: `"Presson Fitness Gym" <${gmailUser}>`,
+    to: params.recipientEmail,
+    replyTo: params.replyToEmail,
+    subject: params.subject,
+    html: params.html,
+    text: params.text,
+  })
+}
+
 /**
- * Sends a branded Presson Fitness Gym email via Gmail SMTP when any site form is submitted.
+ * Sends a branded Presson Fitness Gym email via Brevo API (preferred) or Gmail SMTP fallback.
  */
 export async function POST(request: Request) {
   let rawFields: Record<string, string>
@@ -108,44 +199,77 @@ export async function POST(request: Request) {
   }
 
   const recipientEmail = process.env.FORM_RECIPIENT_EMAIL?.trim() || FORM_RECIPIENT_EMAIL
+  const brevoApiKey = process.env.BREVO_API_KEY?.trim() || ''
   const gmailUser = process.env.GMAIL_USER?.trim() || recipientEmail
+  const brevoSenderEmail = process.env.BREVO_SENDER_EMAIL?.trim() || gmailUser
   const gmailAppPassword = (process.env.GMAIL_APP_PASSWORD || '').replace(/\s+/g, '')
 
-  if (!gmailAppPassword) {
+  if (!brevoApiKey && !gmailAppPassword) {
     return Response.json(
       {
         ok: false,
-        code: 'SMTP_NOT_CONFIGURED',
+        code: 'EMAIL_NOT_CONFIGURED',
         message:
-          'Branded email delivery needs your Google App Password first: add GMAIL_APP_PASSWORD in .env.local and restart the dev server.',
+          process.env.VERCEL || process.env.NODE_ENV === 'production'
+            ? `Email delivery is not configured yet. Please contact ${recipientEmail} directly.`
+            : 'Email delivery needs BREVO_API_KEY (recommended) or GMAIL_APP_PASSWORD in .env.local.',
       },
       { status: 503 },
     )
   }
 
   const { subject, html, text } = buildContactEmail(payload)
+  const emailParams: EmailSendParams = {
+    senderEmail: brevoSenderEmail,
+    recipientEmail,
+    replyToEmail: payload.email && EMAIL_PATTERN.test(payload.email) ? payload.email : undefined,
+    replyToName: payload.name.replace(/[\r\n]+/g, ' ').trim(),
+    subject,
+    html,
+    text,
+  }
+
+  if (brevoApiKey) {
+    try {
+      await sendViaBrevo(brevoApiKey, emailParams)
+      return Response.json({ ok: true, message: 'Email sent successfully.' })
+    } catch (err) {
+      console.error('Brevo email send failed:', err)
+      const status = typeof err === 'object' && err !== null && 'status' in err ? Number((err as { status?: unknown }).status) : 0
+      const msg = err instanceof Error ? err.message : ''
+
+      if (status === 401 || status === 403) {
+        return Response.json(
+          {
+            ok: false,
+            message: `Email service authentication failed (check BREVO_API_KEY). Please try again or reach out directly at ${recipientEmail}.`,
+          },
+          { status: 502 },
+        )
+      }
+
+      if (status === 400 && /sender|valid/i.test(msg)) {
+        return Response.json(
+          {
+            ok: false,
+            message: `Sender email (${brevoSenderEmail}) must be verified in Brevo Senders before sending.`,
+          },
+          { status: 502 },
+        )
+      }
+
+      return Response.json(
+        {
+          ok: false,
+          message: `Unable to deliver email right now. Please try again or reach out directly at ${recipientEmail}.`,
+        },
+        { status: 502 },
+      )
+    }
+  }
 
   try {
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      connectionTimeout: 10000,
-      greetingTimeout: 10000,
-      socketTimeout: 15000,
-      auth: {
-        user: gmailUser,
-        pass: gmailAppPassword,
-      },
-    })
-
-    await transporter.sendMail({
-      from: `"Presson Fitness Gym" <${gmailUser}>`,
-      to: recipientEmail,
-      replyTo: payload.email && EMAIL_PATTERN.test(payload.email) ? payload.email : undefined,
-      subject,
-      html,
-      text,
-    })
-
+    await sendViaGmailSmtp(gmailUser, gmailAppPassword, emailParams)
     return Response.json({ ok: true, message: 'Email sent successfully.' })
   } catch (err) {
     console.error('Gmail SMTP send failed:', err)
@@ -156,8 +280,7 @@ export async function POST(request: Request) {
       return Response.json(
         {
           ok: false,
-          message:
-            'Gmail rejected the App Password (EAUTH). Double-check GMAIL_USER and the 16-character GMAIL_APP_PASSWORD in .env.local.',
+          message: `Gmail blocked SMTP sign-in (EAUTH). Switch to BREVO_API_KEY in Vercel/env, or verify the Gmail account security lock.`,
         },
         { status: 502 },
       )
