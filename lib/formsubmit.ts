@@ -1,10 +1,9 @@
 /**
- * Recipient email for website form notifications during testing.
- * Switch to 'carlvine0926@gmail.com' (or set FORM_RECIPIENT_EMAIL /
- * NEXT_PUBLIC_FORM_RECIPIENT_EMAIL) before handing off to the client.
+ * Client inbox email receiving all website form notifications.
+ * Can be overridden with FORM_RECIPIENT_EMAIL or NEXT_PUBLIC_FORM_RECIPIENT_EMAIL.
  */
 export const FORM_RECIPIENT_EMAIL =
-  process.env.NEXT_PUBLIC_FORM_RECIPIENT_EMAIL?.trim() || 'jerwinmasagca@gmail.com'
+  process.env.NEXT_PUBLIC_FORM_RECIPIENT_EMAIL?.trim() || 'leizlmrtnz@gmail.com'
 
 /** Public gym email shown in direct coach contact links. */
 export const GYM_CONTACT_EMAIL = 'carlvine0926@gmail.com'
