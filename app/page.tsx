@@ -49,17 +49,12 @@ const membershipPlanOptions: SelectOption[] = [
     label: 'Annually 12-Months (Regular: ₱7,950 / Student & Senior: ₱7,100)',
   },
   {
-    value: '1-on-1 Personal Training Package',
-    label: '1-on-1 Personal Training Package',
-  },
-  {
     value: 'General Inquiry / Other',
     label: 'General Inquiry / Other',
   },
 ]
 
 const bookingServiceOptions: SelectOption[] = [
-  { value: '1-on-1 Personal Training', label: '1-on-1 Personal Training Assessment' },
   { value: 'Group Strength', label: 'Group Strength Session' },
   { value: 'Open Gym Trial', label: 'Open Gym Day Trial' },
 ]
@@ -196,7 +191,7 @@ export default function Page() {
   const [selectedPlan, setSelectedPlan] = useState('')
   const [membershipPhone, setMembershipPhone] = useState('')
   const [membershipStartDate, setMembershipStartDate] = useState('')
-  const [bookingService, setBookingService] = useState('1-on-1 Personal Training')
+  const [bookingService, setBookingService] = useState('')
   const [bookingPhone, setBookingPhone] = useState('')
   const [bookingDate, setBookingDate] = useState('')
   const [bookingTime, setBookingTime] = useState('')
@@ -311,7 +306,7 @@ export default function Page() {
         setMembershipStartDate('')
       }
       if (formKey === 'booking') {
-        setBookingService('1-on-1 Personal Training')
+        setBookingService('')
         setBookingPhone('')
         setBookingDate('')
         setBookingTime('')
