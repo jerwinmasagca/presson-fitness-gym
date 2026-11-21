@@ -39,9 +39,9 @@ export default function ContactPage() {
     >
       <section className="container contact-page-grid">
         <div className="contact-detail large-contact">
-          <strong>123 Fitness Avenue</strong>
+          <strong>1807 Kapalaran St., Litex Rd.</strong>
           <br />
-          Quezon City, Philippines
+          Brgy. Commonwealth, Quezon City, Metro Manila, 1121
           <br />
           <small style={{ color: '#c9a96a' }}>(Right beside the Sports Court · Court parking available)</small>
           <br />

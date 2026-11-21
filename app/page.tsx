@@ -1027,7 +1027,7 @@ export default function Page() {
                 </span>
                 <div>
                   <strong>Location & Address</strong>
-                  <p>123 Fitness Avenue, Quezon City, Philippines</p>
+                  <p>1807 Kapalaran St., Litex Rd., Brgy. Commonwealth, Quezon City, Metro Manila, 1121</p>
                   <small className="info-hint">(Right beside the Sports Court &middot; Court Parking for Cars &amp; Motorcycles)</small>
                 </div>
               </div>

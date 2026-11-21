@@ -326,7 +326,7 @@ export function buildContactEmail(
                 }
               </p>
               <p style="margin:0;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:11px;line-height:1.6;color:#9C968B;">
-                123 Fitness Avenue, Quezon City (Beside the Sports Court) &middot; Open Daily 8:00 AM &ndash; 10:00 PM
+                1807 Kapalaran St., Litex Rd., Brgy. Commonwealth, Quezon City, Metro Manila, 1121 &middot; Open Daily 8:00 AM &ndash; 10:00 PM
                 <br />
                 Presson Fitness Gym &mdash; Train Harder. Live Stronger.
               </p>
