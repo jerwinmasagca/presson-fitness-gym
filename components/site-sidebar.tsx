@@ -5,6 +5,7 @@ import Link from 'next/link'
 import {
   ChevronLeft,
   ChevronRight,
+  Clock,
   Dumbbell,
   Home,
   Images,
@@ -311,11 +312,8 @@ export function SiteSidebar({
           </button>
 
           <div className="sidebar-info-card">
-            <div className="sidebar-status-row" title="Open Daily · 8 AM – 10 PM">
-              <span className="status-badge">
-                <span className="status-dot" aria-hidden="true" />
-                OPEN
-              </span>
+            <div className="sidebar-meta-row" title="Open Daily · 8 AM – 10 PM">
+              <Clock size={15} strokeWidth={2} aria-hidden="true" />
               <span className="sidebar-label">Daily · 8 AM – 10 PM</span>
             </div>
             <div className="sidebar-meta-row" title="1807 Kapalaran St., Litex Rd., Brgy. Commonwealth, QC">
