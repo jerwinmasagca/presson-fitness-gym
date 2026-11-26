@@ -223,12 +223,17 @@ export function SiteSidebar({
               onOpenSearch()
             }}
           >
-            <Search size={18} strokeWidth={2.1} aria-hidden="true" />
-            <span className="sidebar-label">Quick Search...</span>
+            <span className="sidebar-search-left">
+              <Search size={17} strokeWidth={2.2} aria-hidden="true" />
+              <span className="sidebar-label">Quick Search...</span>
+            </span>
+            <kbd className="sidebar-search-kbd sidebar-label">/</kbd>
           </button>
         )}
 
-        <nav className="sidebar-nav" aria-label="Primary navigation">
+        <div className="sidebar-nav-section">
+          <span className="sidebar-section-label sidebar-label">Menu</span>
+          <nav className="sidebar-nav" aria-label="Primary navigation">
           {items.map((item) => {
             const isActive = useLinks
               ? item.href === activeHref
@@ -244,8 +249,9 @@ export function SiteSidebar({
                 aria-current={isActive ? 'page' : undefined}
                 onClick={closeDrawer}
               >
-                {renderNavIcon(item.id)}
-                <span className="sidebar-label">{item.label}</span>
+                <span className="sidebar-link-icon">{renderNavIcon(item.id)}</span>
+                <span className="sidebar-label sidebar-link-text">{item.label}</span>
+                {isActive && <span className="sidebar-active-dot sidebar-label" aria-hidden="true" />}
               </Link>
             ) : (
               <a
@@ -257,43 +263,68 @@ export function SiteSidebar({
                 aria-current={isActive ? 'location' : undefined}
                 onClick={() => handleItemSelect(item.id)}
               >
-                {renderNavIcon(item.id)}
-                <span className="sidebar-label">{item.label}</span>
+                <span className="sidebar-link-icon">{renderNavIcon(item.id)}</span>
+                <span className="sidebar-label sidebar-link-text">{item.label}</span>
+                {isActive && <span className="sidebar-active-dot sidebar-label" aria-hidden="true" />}
               </a>
             )
           })}
-        </nav>
+          </nav>
+        </div>
 
         <div className="sidebar-footer">
+          <div className="sidebar-theme-segmented" role="group" aria-label="Color theme">
+            <button
+              type="button"
+              className={`theme-seg-btn ${theme === 'dark' ? 'is-selected' : ''}`}
+              onClick={() => {
+                if (theme !== 'dark') toggleTheme()
+              }}
+              aria-pressed={theme === 'dark'}
+              title="Dark Mode"
+            >
+              <Moon size={15} strokeWidth={2.1} aria-hidden="true" />
+              <span className="sidebar-label">Dark</span>
+            </button>
+            <button
+              type="button"
+              className={`theme-seg-btn ${theme === 'light' ? 'is-selected' : ''}`}
+              onClick={() => {
+                if (theme !== 'light') toggleTheme()
+              }}
+              aria-pressed={theme === 'light'}
+              title="Light Mode"
+            >
+              <Sun size={15} strokeWidth={2.1} aria-hidden="true" />
+              <span className="sidebar-label">Light</span>
+            </button>
+          </div>
+
           <button
             type="button"
-            className="sidebar-theme-btn"
+            className="sidebar-theme-mini-btn"
             onClick={toggleTheme}
             aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
           >
-            {theme === 'dark' ? (
-              <Sun size={17} strokeWidth={2} aria-hidden="true" />
-            ) : (
-              <Moon size={17} strokeWidth={2} aria-hidden="true" />
-            )}
-            <span className="sidebar-label">
-              {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
-            </span>
+            {theme === 'dark' ? <Sun size={18} strokeWidth={2.1} /> : <Moon size={18} strokeWidth={2.1} />}
           </button>
 
           <div className="sidebar-info-card">
             <div className="sidebar-status-row" title="Open Daily · 8 AM – 10 PM">
-              <span className="status-dot" aria-hidden="true" />
-              <span className="sidebar-label">Open Daily · 8 AM – 10 PM</span>
+              <span className="status-badge">
+                <span className="status-dot" aria-hidden="true" />
+                OPEN
+              </span>
+              <span className="sidebar-label">Daily · 8 AM – 10 PM</span>
             </div>
-            <div className="sidebar-meta-row" title="Commonwealth, Quezon City">
+            <div className="sidebar-meta-row" title="1807 Kapalaran St., Litex Rd., Brgy. Commonwealth, QC">
               <MapPin size={15} strokeWidth={2} aria-hidden="true" />
-              <span className="sidebar-label">Commonwealth, QC</span>
+              <span className="sidebar-label">Litex Rd., Commonwealth, QC</span>
             </div>
             <div className="sidebar-quick-links">
               <a href="tel:+639270660386" className="sidebar-quick-btn" title="Call 0927 066 0386">
-                <Phone size={15} strokeWidth={2} aria-hidden="true" />
+                <Phone size={14} strokeWidth={2.1} aria-hidden="true" />
                 <span className="sidebar-label">Call</span>
               </a>
               <a
@@ -303,7 +334,7 @@ export function SiteSidebar({
                 className="sidebar-quick-btn"
                 title="Facebook Page"
               >
-                <FacebookIcon size={15} strokeWidth={2} />
+                <FacebookIcon size={14} strokeWidth={2.1} />
                 <span className="sidebar-label">Facebook</span>
               </a>
             </div>
