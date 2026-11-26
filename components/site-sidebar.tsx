@@ -12,8 +12,10 @@ import {
   Mail,
   MapPin,
   Menu,
+  Moon,
   Phone,
   Search,
+  Sun,
   Tag,
   X,
 } from 'lucide-react'
@@ -71,6 +73,29 @@ export function SiteSidebar({
 }: SiteSidebarProps) {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark')
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('presson-theme')
+      const initial = saved === 'light' ? 'light' : 'dark'
+      setTheme(initial)
+      document.documentElement.setAttribute('data-theme', initial)
+    } catch {
+      document.documentElement.setAttribute('data-theme', 'dark')
+    }
+  }, [])
+
+  const toggleTheme = () => {
+    const next = theme === 'dark' ? 'light' : 'dark'
+    setTheme(next)
+    document.documentElement.setAttribute('data-theme', next)
+    try {
+      localStorage.setItem('presson-theme', next)
+    } catch {
+      // Ignore storage errors
+    }
+  }
 
   useEffect(() => {
     if (!drawerOpen) return
@@ -105,6 +130,15 @@ export function SiteSidebar({
         )}
 
         <div className="mobile-topbar-actions">
+          <button
+            type="button"
+            className="sidebar-icon-btn"
+            onClick={toggleTheme}
+            aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          >
+            {theme === 'dark' ? <Sun size={19} strokeWidth={2.1} /> : <Moon size={19} strokeWidth={2.1} />}
+          </button>
           {onOpenSearch && (
             <button
               type="button"
@@ -231,6 +265,23 @@ export function SiteSidebar({
         </nav>
 
         <div className="sidebar-footer">
+          <button
+            type="button"
+            className="sidebar-theme-btn"
+            onClick={toggleTheme}
+            aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          >
+            {theme === 'dark' ? (
+              <Sun size={17} strokeWidth={2} aria-hidden="true" />
+            ) : (
+              <Moon size={17} strokeWidth={2} aria-hidden="true" />
+            )}
+            <span className="sidebar-label">
+              {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+            </span>
+          </button>
+
           <div className="sidebar-info-card">
             <div className="sidebar-status-row" title="Open Daily · 8 AM – 10 PM">
               <span className="status-dot" aria-hidden="true" />
