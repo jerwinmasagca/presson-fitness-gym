@@ -18,7 +18,8 @@ import {
   TimePickerField,
   type SelectOption,
 } from '@/components/form-controls'
-import { ScrollProgressBar, useScrollReveal } from '@/components/scroll-effects'
+import { useScrollReveal } from '@/components/scroll-effects'
+import { SiteSidebar } from '@/components/site-sidebar'
 import { FacebookIcon } from '@/components/social-icons'
 
 function revealDelay(index: number, stepMs = 80): React.CSSProperties {
@@ -159,6 +160,7 @@ const navItems = [
   { id: 'home', label: 'Home', href: '#home' },
   { id: 'about', label: 'About Us', href: '#about' },
   { id: 'rates', label: 'Rates', href: '#rates' },
+  { id: 'services', label: 'Services', href: '#services' },
   { id: 'gallery', label: 'Gallery', href: '#gallery' },
   { id: 'contact', label: 'Contact Us', href: '#contact' },
 ] as const
@@ -173,8 +175,9 @@ function mapHrefToNavSection(href: string): NavSectionId {
     case '#rates':
     case '#join':
     case '#facility':
-    case '#services':
       return 'rates'
+    case '#services':
+      return 'services'
     case '#gallery':
     case '#faq':
       return 'gallery'
@@ -186,7 +189,6 @@ function mapHrefToNavSection(href: string): NavSectionId {
 }
 
 export default function Page() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [activeSection, setActiveSection] = useState<NavSectionId>('home')
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -271,12 +273,9 @@ export default function Page() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [lightboxIndex])
 
-  const closeMenu = () => setMobileMenuOpen(false)
-
-  const handleNavClick = (id: NavSectionId) => {
+  const handleNavClick = (id: string) => {
     scrollLockUntilRef.current = Date.now() + 750
-    setActiveSection(id)
-    setMobileMenuOpen(false)
+    setActiveSection(id as NavSectionId)
   }
 
   const handleSelectPlan = (plan: string) => {
@@ -321,74 +320,15 @@ export default function Page() {
   }
 
   return (
-    <main>
-      {/* Sticky Header Navigation */}
-      <header className="site-header">
-        <a
-          className="brand"
-          href="#home"
-          aria-label="Presson Fitness Gym home"
-          onClick={() => handleNavClick('home')}
-        >
-          <img className="logo-image" src="/images/logo.png" alt="Presson Fitness Gym logo" />
-          <span>PRESSON<span>FITNESS GYM</span></span>
-        </a>
-
-        <div className="header-mobile-actions">
-          <button
-            type="button"
-            className="nav-search-btn mobile-search-trigger"
-            onClick={() => setSearchOpen(true)}
-            aria-label="Search rates, parking, or services"
-          >
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <circle cx="11" cy="11" r="7" />
-              <line x1="20" y1="20" x2="16.2" y2="16.2" />
-            </svg>
-          </button>
-
-          <button
-            className="mobile-toggle"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle navigation menu"
-          >
-            {mobileMenuOpen ? '✕' : '☰'}
-          </button>
-        </div>
-
-        {/* Navigation Menu */}
-        <nav aria-label="Primary navigation" className={mobileMenuOpen ? 'nav-active' : ''}>
-          {navItems.map((item) => (
-            <a
-              key={item.id}
-              href={item.href}
-              className={activeSection === item.id ? 'nav-link-active' : ''}
-              aria-current={activeSection === item.id ? 'location' : undefined}
-              onClick={() => handleNavClick(item.id)}
-            >
-              {item.label}
-            </a>
-          ))}
-
-          <button
-            type="button"
-            className="nav-search-btn desktop-search-trigger"
-            onClick={() => {
-              closeMenu()
-              setSearchOpen(true)
-            }}
-            aria-label="Search rates, parking, or services"
-          >
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <circle cx="11" cy="11" r="7" />
-              <line x1="20" y1="20" x2="16.2" y2="16.2" />
-            </svg>
-          </button>
-
-          <a className="nav-cta" href="#join" onClick={() => handleNavClick('rates')}>Join Now</a>
-        </nav>
-        <ScrollProgressBar />
-      </header>
+    <main className="app-shell">
+      <SiteSidebar
+        items={navItems}
+        activeId={activeSection}
+        ctaHref="#join"
+        ctaLabel="Join Now"
+        onNavClick={handleNavClick}
+        onOpenSearch={() => setSearchOpen(true)}
+      />
 
       {/* Quick Search Modal */}
       {searchOpen && (
@@ -442,6 +382,8 @@ export default function Page() {
         </div>
       )}
 
+      {/* Main Content Area beside Left Sidebar */}
+      <div className="with-sidebar-main">
       {/* Hero Section */}
       <section className="hero-banner" id="home" aria-label="Train harder, live stronger at Presson Fitness Gym">
         <img
@@ -695,7 +637,7 @@ export default function Page() {
         </div>
 
         {/* Form A */}
-        <form className="styled-form" action={CONTACT_API_ENDPOINT} method="POST" noValidate onSubmit={(e) => handleFormSubmit(e, 'membership')} data-reveal="" style={revealDelay(1, 100)}>
+        <form className="styled-form dark-form" action={CONTACT_API_ENDPOINT} method="POST" noValidate onSubmit={(e) => handleFormSubmit(e, 'membership')} data-reveal="" style={revealDelay(1, 100)}>
           <input type="hidden" name="form_type" value="membership" />
           <Field label="Full Name *" name="name" placeholder="Juan dela Cruz" />
           <PhoneInputField
@@ -713,7 +655,7 @@ export default function Page() {
             options={membershipPlanOptions}
             placeholder="Choose a membership option"
             required
-            variant="light"
+            variant="dark"
           />
           <DatePickerField
             label="Target Start Date"
@@ -721,10 +663,10 @@ export default function Page() {
             value={membershipStartDate}
             onChange={setMembershipStartDate}
             placeholder="Click to choose date"
-            variant="light"
+            variant="dark"
           />
           <button
-            className="button button-dark"
+            className="button button-gold"
             type="submit"
             disabled={formStatuses.membership === 'submitting'}
           >
@@ -1139,6 +1081,7 @@ export default function Page() {
           <Zap size={15} strokeWidth={2.1} aria-hidden="true" />
           <span>Book Session</span>
         </a>
+      </div>
       </div>
     </main>
   )
