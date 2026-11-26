@@ -1,0 +1,281 @@
+'use client'
+
+import React, { useState, useEffect } from 'react'
+import Link from 'next/link'
+import {
+  ChevronLeft,
+  ChevronRight,
+  Dumbbell,
+  Home,
+  Images,
+  Info,
+  Mail,
+  MapPin,
+  Menu,
+  Phone,
+  Search,
+  Tag,
+  X,
+} from 'lucide-react'
+import { FacebookIcon } from '@/components/social-icons'
+import { GYM_FACEBOOK_URL } from '@/lib/formsubmit'
+import { ScrollProgressBar } from '@/components/scroll-effects'
+
+export interface SidebarNavItem {
+  id: string
+  label: string
+  href: string
+}
+
+interface SiteSidebarProps {
+  items: readonly SidebarNavItem[]
+  activeId?: string
+  activeHref?: string
+  ctaHref: string
+  ctaLabel?: string
+  useLinks?: boolean
+  onNavClick?: (id: string) => void
+  onOpenSearch?: () => void
+}
+
+function renderNavIcon(id: string) {
+  switch (id) {
+    case 'home':
+      return <Home size={19} strokeWidth={2} aria-hidden="true" />
+    case 'about':
+      return <Info size={19} strokeWidth={2} aria-hidden="true" />
+    case 'rates':
+      return <Tag size={19} strokeWidth={2} aria-hidden="true" />
+    case 'services':
+      return <Dumbbell size={19} strokeWidth={2} aria-hidden="true" />
+    case 'gallery':
+      return <Images size={19} strokeWidth={2} aria-hidden="true" />
+    case 'contact':
+    default:
+      return <Mail size={19} strokeWidth={2} aria-hidden="true" />
+  }
+}
+
+/**
+ * Collapsible dark-theme navigation sidebar (open by default on desktop with mini-rail toggle, slide-in drawer on mobile).
+ */
+export function SiteSidebar({
+  items,
+  activeId,
+  activeHref,
+  ctaHref,
+  ctaLabel = 'Join Now',
+  useLinks = false,
+  onNavClick,
+  onOpenSearch,
+}: SiteSidebarProps) {
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
+
+  useEffect(() => {
+    if (!drawerOpen) return
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setDrawerOpen(false)
+    }
+    window.addEventListener('keydown', handleEsc)
+    return () => window.removeEventListener('keydown', handleEsc)
+  }, [drawerOpen])
+
+  const closeDrawer = () => setDrawerOpen(false)
+
+  const handleItemSelect = (id: string) => {
+    closeDrawer()
+    onNavClick?.(id)
+  }
+
+  return (
+    <>
+      {/* Mobile / Tablet Top Header Bar */}
+      <header className="mobile-topbar">
+        {useLinks ? (
+          <Link className="brand" href="/" onClick={closeDrawer}>
+            <img className="logo-image" src="/images/logo.png" alt="Presson Fitness Gym logo" />
+            <span>PRESSON<span>FITNESS GYM</span></span>
+          </Link>
+        ) : (
+          <a className="brand" href="#home" onClick={() => handleItemSelect('home')}>
+            <img className="logo-image" src="/images/logo.png" alt="Presson Fitness Gym logo" />
+            <span>PRESSON<span>FITNESS GYM</span></span>
+          </a>
+        )}
+
+        <div className="mobile-topbar-actions">
+          {onOpenSearch && (
+            <button
+              type="button"
+              className="sidebar-icon-btn"
+              onClick={() => {
+                closeDrawer()
+                onOpenSearch()
+              }}
+              aria-label="Search rates, parking, or services"
+            >
+              <Search size={20} strokeWidth={2.1} aria-hidden="true" />
+            </button>
+          )}
+          <button
+            type="button"
+            className="sidebar-icon-btn"
+            onClick={() => setDrawerOpen((prev) => !prev)}
+            aria-label={drawerOpen ? 'Close navigation sidebar' : 'Open navigation sidebar'}
+            aria-expanded={drawerOpen}
+          >
+            {drawerOpen ? <X size={24} strokeWidth={2.1} /> : <Menu size={24} strokeWidth={2.1} />}
+          </button>
+        </div>
+        <ScrollProgressBar />
+      </header>
+
+      {/* Mobile Drawer Backdrop */}
+      {drawerOpen && (
+        <div
+          className="sidebar-backdrop"
+          aria-hidden="true"
+          onClick={closeDrawer}
+        />
+      )}
+
+      {/* Collapsible Left Sidebar (Desktop) / Slide-in Drawer (Mobile) */}
+      <aside
+        className={`site-sidebar ${drawerOpen ? 'is-open' : ''} ${collapsed ? 'is-collapsed' : ''}`}
+        aria-label="Sidebar navigation"
+      >
+        <div className="sidebar-top">
+          {useLinks ? (
+            <Link className="brand sidebar-brand" href="/" onClick={closeDrawer} title="Presson Fitness Gym">
+              <img className="logo-image" src="/images/logo.png" alt="Presson Fitness Gym logo" />
+              <span className="sidebar-brand-text">PRESSON<span>FITNESS GYM</span></span>
+            </Link>
+          ) : (
+            <a className="brand sidebar-brand" href="#home" onClick={() => handleItemSelect('home')} title="Presson Fitness Gym">
+              <img className="logo-image" src="/images/logo.png" alt="Presson Fitness Gym logo" />
+              <span className="sidebar-brand-text">PRESSON<span>FITNESS GYM</span></span>
+            </a>
+          )}
+
+          <button
+            type="button"
+            className="sidebar-collapse-btn"
+            onClick={() => setCollapsed((prev) => !prev)}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+          </button>
+
+          <button
+            type="button"
+            className="sidebar-close-btn"
+            onClick={closeDrawer}
+            aria-label="Close sidebar"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {onOpenSearch && (
+          <button
+            type="button"
+            className="sidebar-search-btn"
+            title="Quick Search"
+            aria-label="Quick Search"
+            onClick={() => {
+              closeDrawer()
+              onOpenSearch()
+            }}
+          >
+            <Search size={18} strokeWidth={2.1} aria-hidden="true" />
+            <span className="sidebar-label">Quick Search...</span>
+          </button>
+        )}
+
+        <nav className="sidebar-nav" aria-label="Primary navigation">
+          {items.map((item) => {
+            const isActive = useLinks
+              ? item.href === activeHref
+              : activeId === item.id
+
+            return useLinks ? (
+              <Link
+                key={item.id}
+                href={item.href}
+                title={item.label}
+                aria-label={item.label}
+                className={`sidebar-link ${isActive ? 'is-active' : ''}`}
+                aria-current={isActive ? 'page' : undefined}
+                onClick={closeDrawer}
+              >
+                {renderNavIcon(item.id)}
+                <span className="sidebar-label">{item.label}</span>
+              </Link>
+            ) : (
+              <a
+                key={item.id}
+                href={item.href}
+                title={item.label}
+                aria-label={item.label}
+                className={`sidebar-link ${isActive ? 'is-active' : ''}`}
+                aria-current={isActive ? 'location' : undefined}
+                onClick={() => handleItemSelect(item.id)}
+              >
+                {renderNavIcon(item.id)}
+                <span className="sidebar-label">{item.label}</span>
+              </a>
+            )
+          })}
+        </nav>
+
+        <div className="sidebar-footer">
+          <div className="sidebar-info-card">
+            <div className="sidebar-status-row" title="Open Daily · 8 AM – 10 PM">
+              <span className="status-dot" aria-hidden="true" />
+              <span className="sidebar-label">Open Daily · 8 AM – 10 PM</span>
+            </div>
+            <div className="sidebar-meta-row" title="Commonwealth, Quezon City">
+              <MapPin size={15} strokeWidth={2} aria-hidden="true" />
+              <span className="sidebar-label">Commonwealth, QC</span>
+            </div>
+            <div className="sidebar-quick-links">
+              <a href="tel:+639270660386" className="sidebar-quick-btn" title="Call 0927 066 0386">
+                <Phone size={15} strokeWidth={2} aria-hidden="true" />
+                <span className="sidebar-label">Call</span>
+              </a>
+              <a
+                href={GYM_FACEBOOK_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="sidebar-quick-btn"
+                title="Facebook Page"
+              >
+                <FacebookIcon size={15} strokeWidth={2} />
+                <span className="sidebar-label">Facebook</span>
+              </a>
+            </div>
+          </div>
+
+          {useLinks ? (
+            <Link className="sidebar-cta" href={ctaHref} onClick={closeDrawer} title={ctaLabel}>
+              <span className="sidebar-label">{ctaLabel}</span>
+              <span aria-hidden="true">↗</span>
+            </Link>
+          ) : (
+            <a
+              className="sidebar-cta"
+              href={ctaHref}
+              title={ctaLabel}
+              onClick={() => handleItemSelect('rates')}
+            >
+              <span className="sidebar-label">{ctaLabel}</span>
+              <span aria-hidden="true">↗</span>
+            </a>
+          )}
+        </div>
+      </aside>
+    </>
+  )
+}
