@@ -3,7 +3,7 @@
  * Can be overridden with FORM_RECIPIENT_EMAIL or NEXT_PUBLIC_FORM_RECIPIENT_EMAIL.
  */
 export const FORM_RECIPIENT_EMAIL =
-  process.env.NEXT_PUBLIC_FORM_RECIPIENT_EMAIL?.trim() || 'leizlmrtnz@gmail.com'
+  process.env.NEXT_PUBLIC_FORM_RECIPIENT_EMAIL?.trim() || 'carlvine0926@gmail.com'
 
 /** Public gym email shown in direct coach contact links. */
 export const GYM_CONTACT_EMAIL = 'carlvine0926@gmail.com'
